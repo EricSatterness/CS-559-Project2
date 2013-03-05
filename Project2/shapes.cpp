@@ -92,8 +92,10 @@ void DefineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_
 	vec3 up_n = glm::normalize(up);
 	vec3 right_n = glm::normalize(right);
 
-	float vertexRowSpacing = height/vertexRows;
-	float vertexColSpacing = width/vertexCols;
+	/*float vertexrowspacing = height/vertexrows;
+	float vertexcolspacing = width/vertexcols;*/
+	float vertexRowSpacing = height/(vertexRows-1);
+	float vertexColSpacing = width/(vertexCols-1);
 
 	// Vertex attributes
 	vec3 p = topleft;
@@ -112,6 +114,7 @@ void DefineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_
 		p = p - (right_n * (float(width+1) - tanf(angle)));
 	}*/
 
+	// Create the vertices in row-major order
 	for (int i = 0; i < vertexRows; i++)
 	{
 		for (int j = 0; j < vertexCols; j++)
@@ -120,8 +123,10 @@ void DefineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_
 			p = p + right_n * vertexColSpacing;
 		}
 		p = p - up_n * vertexRowSpacing;
-		//p = p - (right_n * (width - tanf(angle)));
-		p = p - (right_n * width) + (right_n * tanf(angle));
+
+		vec3 resetLeft = -right_n * (width + vertexColSpacing);
+		vec3 angleOffset = right_n * vertexRowSpacing * tanf(angle);
+		p = p + resetLeft + angleOffset;
 	}
 
 	DefineVertexIndices(vertex_indices, vertexRows, vertexCols, startPos);

@@ -7,7 +7,7 @@ using namespace glm;
 // Assign values to static constants
 const float Stool::SCALE_FACTOR = 2.2949f;
 
-#define DRAW_POINTS (1)
+#define DRAW_POINTS (0)
 #define DRAW_LINES (0)
 
 Stool::Stool() : Object()
@@ -112,17 +112,17 @@ bool Stool::Initialize()
 
 void Stool::InitLeg()
 {
-	//float width = 1.606f;
-	//float height = 22.167f;
-	//int vertexRows = 111;
-	//int vertexCols = 8;
+	float width = 1.606f;
+	float height = 22.167f;
+	int vertexRows = 111;
+	int vertexCols = 8;
 
-	float width = 2.0f;
-	float height = 20.0f;
-	int vertexRows = 20;
-	int vertexCols = 2;
+	/*float width = 2.0f;
+	float height = 10.0f;
+	int vertexRows = 21;
+	int vertexCols = 5;*/
 
-	vec3 center(0.0f, 0.0f, 0.0f);
+	vec3 center(0.0f, 1.0f, 0.0f);
 	float w_2 = width / 2.0f;
 	float h_2 = height / 2.0f;
 	float angle = 15.0f*PI/180.0f;
@@ -141,10 +141,10 @@ void Stool::InitLeg()
 	//DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x - w_2, center.y + h_2, center.z - w_2), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), height, width, 0.0f);
 
 	// Tilted rectangle
-	//DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x - w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) + w_2)), vec3(0.0f, cosf(angle), sinf(-angle)), vec3(1.0f, 0.0f, 0.0f), height, width, 0.0f, vertexRows, vertexCols);
+	DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x - w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) + w_2)), vec3(0.0f, cosf(angle), sinf(-angle)), vec3(1.0f, 0.0f, 0.0f), height, width, 0.0f, vertexRows, vertexCols);
 	DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x + w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) + w_2)), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f), height*sin(PI/2 - angle), width, -angle, vertexRows, vertexCols);
-	//DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x + w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) - w_2)), vec3(0.0f, cosf(angle), sinf(-angle)), vec3(-1.0f, 0.0f, 0.0f), height, width, 0.0f, vertexRows, vertexCols);
-	//DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x - w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) - w_2)), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), height*sin(PI/2 - angle), width, angle, vertexRows, vertexCols);
+	DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x + w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) - w_2)), vec3(0.0f, cosf(angle), sinf(-angle)), vec3(-1.0f, 0.0f, 0.0f), height, width, 0.0f, vertexRows, vertexCols);
+	DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x - w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) - w_2)), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), height*sin(PI/2 - angle), width, angle, vertexRows, vertexCols);
 
 	// Top and Bottom
 	//DefineRhombus(this->vertices, this->vertex_indices, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), height, width, 0.0f);

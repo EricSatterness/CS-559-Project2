@@ -186,6 +186,9 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 	// Scale from feet to inches
 	mat4 m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
 
+	// Make scale a little bigger while debugging
+	//mat4 m = scale(modelview_matrix, vec3(0.15f, 0.15f, 0.15f));
+
 	// Draw the stools in arbitrary positions
 	//stool1->Draw(window.projection_matrix, window.modelview_matrix, window.size, 0.0f);
 	stool1->Draw(window.projection_matrix, m, window.size, 0.0f);
