@@ -8,7 +8,6 @@ using namespace glm;
 const float Stool::SCALE_FACTOR = 2.2949f;
 
 #define DRAW_POINTS (0)
-#define DRAW_LINES (0)
 
 Stool::Stool() : Object()
 {
@@ -141,14 +140,21 @@ void Stool::InitLeg()
 	//DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x - w_2, center.y + h_2, center.z - w_2), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), height, width, 0.0f);
 
 	// Tilted rectangle
-	DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x - w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) + w_2)), vec3(0.0f, cosf(angle), sinf(-angle)), vec3(1.0f, 0.0f, 0.0f), height, width, 0.0f, vertexRows, vertexCols);
-	DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x + w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) + w_2)), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f), height*sin(PI/2 - angle), width, -angle, vertexRows, vertexCols);
-	DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x + w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) - w_2)), vec3(0.0f, cosf(angle), sinf(-angle)), vec3(-1.0f, 0.0f, 0.0f), height, width, 0.0f, vertexRows, vertexCols);
-	DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x - w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) - w_2)), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), height*sin(PI/2 - angle), width, angle, vertexRows, vertexCols);
+	//DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x - w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) + w_2)), vec3(0.0f, cosf(angle), sinf(-angle)), vec3(1.0f, 0.0f, 0.0f), height, width, 0.0f, vertexRows, vertexCols);
+	//DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x + w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) + w_2)), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f), height*sin(PI/2 - angle), width, -angle, vertexRows, vertexCols);
+	//DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x + w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) - w_2)), vec3(0.0f, cosf(angle), sinf(-angle)), vec3(-1.0f, 0.0f, 0.0f), height, width, 0.0f, vertexRows, vertexCols);
+	//DefineRhombus(this->vertices, this->vertex_indices, vec3(center.x - w_2, (center.y*cosf(angle) + h_2), (center.z*sinf(angle) - w_2)), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), height*sin(PI/2 - angle), width, angle, vertexRows, vertexCols);
+
+	DefineRhombus(this->vertices, this->vertex_indices, vec3((center.x - w_2), (center.y + h_2), (center.z - h_2*tanf(angle) + w_2)), vec3(0.0f, cosf(angle), sinf(-angle)), vec3(1.0f, 0.0f, 0.0f), height/sin(PI/2 - angle), width, 0.0f, vertexRows, vertexCols);
+	DefineRhombus(this->vertices, this->vertex_indices, vec3((center.x + w_2), (center.y + h_2), (center.z - h_2*tanf(angle) + w_2)), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f), height, width, -angle, vertexRows, vertexCols);
+	DefineRhombus(this->vertices, this->vertex_indices, vec3((center.x + w_2), (center.y + h_2), (center.z - h_2*tanf(angle) - w_2)), vec3(0.0f, cosf(angle), sinf(-angle)), vec3(-1.0f, 0.0f, 0.0f), height/sin(PI/2 - angle), width, 0.0f, vertexRows, vertexCols);
+	DefineRhombus(this->vertices, this->vertex_indices, vec3((center.x - w_2), (center.y + h_2), (center.z - h_2*tanf(angle) - w_2)), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), height, width, angle, vertexRows, vertexCols);
 
 	// Top and Bottom
-	//DefineRhombus(this->vertices, this->vertex_indices, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), height, width, 0.0f);
-	//DefineRhombus(this->vertices, this->vertex_indices, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), height, width, 0.0f);
+	DefineRhombus(this->vertices, this->vertex_indices, vec3((center.x - w_2), (center.y + h_2), (center.z - h_2*tanf(angle) + w_2)), vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f), width, width, 0.0f, vertexCols, vertexCols);
+	DefineRhombus(this->vertices, this->vertex_indices, vec3((center.x - w_2), (center.y - h_2), (center.z + h_2*tanf(angle) + w_2)), vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f), width, width, 0.0f, vertexCols, vertexCols);
+
+	// Theoretically, the shading should work on the side intersections of the legs because we have overalpped the vertices (so they have 2 vertices, each with different normal)
 }
 
 void Stool::TakeDown()
@@ -180,8 +186,6 @@ void Stool::Draw(const mat4 & projection, mat4 modelview, const ivec2 & size, co
 	glBindVertexArray(this->vertex_array_handle);
 #if (DRAW_POINTS)
 	glDrawArrays(GL_POINTS, 0, this->vertex_indices.size());
-#elif (DRAW_LINES)
-	glDrawElements(GL_LINES, this->vertex_indices.size(), GL_UNSIGNED_INT , &this->vertex_indices[0]);
 #else
 	glDrawElements(GL_TRIANGLES, this->vertex_indices.size(), GL_UNSIGNED_INT , &this->vertex_indices[0]);
 #endif
