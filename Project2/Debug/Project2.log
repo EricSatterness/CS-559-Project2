@@ -1,4 +1,4 @@
-﻿Build started 3/4/2013 8:52:37 PM.
+﻿Build started 3/5/2013 6:48:26 PM.
      1>Project "L:\2013Spring\CS559\project2_repo\Project2\Project2.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Project2.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -14,6 +14,7 @@
          Debug\shader.obj
          Debug\shapes.obj
          Debug\Stool.obj
+         Debug\vectorExtensions.obj
          Debug\vertexattributes.obj
        Manifest:
          c:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\Project2.exe.embed.manifest" /manifest Debug\Project2.exe.intermediate.manifest
@@ -25,6 +26,7 @@
          Debug\shader.obj
          Debug\shapes.obj
          Debug\Stool.obj
+         Debug\vectorExtensions.obj
          Debug\vertexattributes.obj
          Project2.vcxproj -> L:\2013Spring\CS559\project2_repo\Debug\Project2.exe
        FinalizeBuildStatus:
@@ -34,4 +36,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:04.35
+Time Elapsed 00:00:10.09

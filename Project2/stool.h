@@ -2,17 +2,20 @@
 #include "object.h"
 #include "shader.h"
 #include "shapes.h"
+#include "vectorExtensions.h"
 
 #include <gl/freeglut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <math.h>
+
 class Stool : public Object
 {
 private:
 	typedef Object super;
-	static const float SCALE_FACTOR;
+	static const float LEG_OFFSET;
 
 	int shader_index;
 
@@ -27,11 +30,13 @@ private:
 	//TexturedShader basic_texture_shader;
 	std::vector<Shader *> shaders;
 
+
+	void InitLeg(vec3 center, vec3 up, vec3 right);
+
 public:
 	Stool();
 	virtual bool Initialize();
     virtual void Draw(const glm::mat4& projection, glm::mat4 modelview, const glm::ivec2 & size, const float time = 0);
     void TakeDown();
     void StepShader();
-	void InitLeg();
 };

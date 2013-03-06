@@ -3,7 +3,7 @@
 // Stores the vertex indeces that define the triangles in any shape
 // height and width refer to the number of vertices in the object as it wraps around.
 // startPos is the position of the first vertex for a shape in the vertex array
-void DefineVertexIndices(vector<GLuint> & vertex_indices, int cols, int rows, int startPos)
+void defineVertexIndices(vector<GLuint> & vertex_indices, int cols, int rows, int startPos)
 {
 	int end = startPos + rows*(cols-1);
 
@@ -27,7 +27,7 @@ void DefineVertexIndices(vector<GLuint> & vertex_indices, int cols, int rows, in
 	}
 }
 
-//void DefineRectangle(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 topleft, int height, int width)
+//void defineRectangle(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 topleft, int height, int width)
 //{
 //	vec3 p = topleft;
 //	vec3 c = vec3(1.0f, 0.0f, 0.0f);
@@ -54,9 +54,9 @@ void DefineVertexIndices(vector<GLuint> & vertex_indices, int cols, int rows, in
 //	vertex_indices.push_back(2);
 //}
 //
-//void DefineCube(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 center, int height, int width)
+//void defineCube(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 center, int height, int width)
 //{
-//	//DefineRhombus(vertices, vertex_indices, center, height, width, 0.0f);
+//	//defineRhombus(vertices, vertex_indices, center, height, width, 0.0f);
 //
 //	//// Each vertex attribute is composed of geometry, color, normal and texture coordinate
 //	//vertices.push_back(VertexAttributes(vec3(-1.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f, 0.0f)));
@@ -73,7 +73,7 @@ void DefineVertexIndices(vector<GLuint> & vertex_indices, int cols, int rows, in
 //	//vertex_indices.push_back(3);
 //}
 
-void DefineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 topleft, vec3 up, vec3 right, float height, float width, float angle, int vertexRows, int vertexCols)
+void defineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 topleft, vec3 up, vec3 right, float height, float width, float angle, int vertexRows, int vertexCols)
 {
 	// Indicates where this shape starts in the vertex array
 	int startPos = vertices.size();
@@ -129,5 +129,5 @@ void DefineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_
 		p = p + resetLeft + angleOffset;
 	}
 
-	DefineVertexIndices(vertex_indices, vertexRows, vertexCols, startPos);
+	defineVertexIndices(vertex_indices, vertexRows, vertexCols, startPos);
 }

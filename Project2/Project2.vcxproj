@@ -85,6 +85,7 @@
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="shapes.cpp" />
     <ClCompile Include="Stool.cpp" />
+    <ClCompile Include="vectorExtensions.cpp" />
     <ClCompile Include="vertexattributes.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -92,6 +93,7 @@
     <ClInclude Include="shader.h" />
     <ClInclude Include="shapes.h" />
     <ClInclude Include="Stool.h" />
+    <ClInclude Include="vectorExtensions.h" />
     <ClInclude Include="vertexattributes.h" />
   </ItemGroup>
   <ItemGroup>
