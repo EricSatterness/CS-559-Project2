@@ -32,7 +32,8 @@ private:
 
 
 	void InitLeg(vec3 center, vec3 up, vec3 right);
-	void InitRingSupport(vec3 center, vec3 up, vec3 right, float radius);
+	//void InitRingSupport(vec3 center, vec3 up, vec3 right, float innerRadius, float outerRadius);
+	void InitRingSupport();
 
 public:
 	Stool();

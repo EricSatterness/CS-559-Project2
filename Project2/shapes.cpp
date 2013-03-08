@@ -131,3 +131,20 @@ void defineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_
 
 	defineVertexIndices(vertex_indices, vertexRows, vertexCols, startPos);
 }
+
+void defineRing(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices)
+{
+	vec3 center(0.0f, 0.0f, 0.0f);
+	vec3 up(0.0f, 1.0f, 0.0f);
+	vec3 right(1.0f, 0.0f, 0.0f);
+	float innerRadius = 0.1f;
+	float outerRadius = 1.0f;
+
+	int slices = 10;
+	int stacks = 2;
+	
+	for (int i = 0; i < slices; i++)
+	{
+
+	}
+}

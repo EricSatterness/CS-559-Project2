@@ -71,7 +71,7 @@ bool Stool::Initialize()
 	InitLeg(vec3(0.0f, 0.0f, -LEG_OFFSET), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f));
 	InitLeg(vec3(-LEG_OFFSET, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
 
-	InitRingSupport(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), 1.0f);
+	//InitRingSupport();
 
 
 	//      The vertex array serves as a handle for the whole bundle.
@@ -174,9 +174,12 @@ void Stool::InitLeg(vec3 center, vec3 up, vec3 right)
 	// We will have to see if the shading works correctly. The vertices on the edges of these rhombi will overlap. So there will essentially be two normals on the corners.
 }
 
-void Stool::InitRingSupport(vec3 center, vec3 up, vec3 right, float radius)
+void Stool::InitRingSupport()
 {
+	vec3 center(0.0f, 0.0f, 0.0f);
+	float outerRadius = 1.0f;
 
+	defineRing(this->vertices, this->vertex_indices);
 }
 
 void Stool::TakeDown()
