@@ -39,6 +39,8 @@ Object::~Object()
 
 void Object::TakeDown()
 {
+	this->vertex_indices.clear();
+
 	if (this->vertex_array_handle != GLuint(-1))
 		glDeleteVertexArrays(1, &this->vertex_array_handle);
 

@@ -7,16 +7,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-//#include "vertexattributes.h"
-#include "object.h"
 #include "stool.h"
-//#include "shader.h"
 
 // Useful links
 //http://www.arcsynthesis.org/gltut/index.html
 
 using namespace std;
 using namespace glm;
+
+#define DEBUG 1
 
 #pragma region Window/Camera Structs
 // Keeps track of data relevant to each individual window
@@ -26,6 +25,7 @@ struct WindowData
 	ivec2 size;
 	float window_aspect;
 	mat4 projection_matrix, modelview_matrix;
+	bool wireframe;
 } window;
 
 // Keeps track of the 1st person camera data
@@ -109,8 +109,14 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		mainCamera.zoom += 1 * zoomSpeed;
 		break;
 
+	// Step through shaders
 	case 's':
 		stool1->StepShader();
+		break;
+
+	// Turn on/off wireframe mode
+	case 'w':
+		window.wireframe = !window.wireframe;
 		break;
 
 	case 'x':
@@ -156,7 +162,10 @@ void SpecialFunc(int key, int x, int y)
 
 void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 {
-	/*// Draw the main axes
+	mat4 m;
+
+#ifdef DEBUG
+	// Draw the main axes
 	glLoadMatrixf(value_ptr(modelview_matrix));
 	glLineWidth(2.0);
 	glBegin(GL_LINES);
@@ -167,7 +176,7 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 
 	// Draw the grid
 	// It was easier to draw the grid in all positive increments starting from (0,0,0) and then just shift it in order to center it on the modelview_matrix
-	mat4 m = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
+	m = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
 	glLoadMatrixf(value_ptr(m));
 	glLineWidth(1.0);
 	glColor3f(1,1,1);
@@ -181,10 +190,11 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 			glVertex3f(0,0,j);
 			glVertex3f(GRIDWIDTH,0,j);
 		}
-	glEnd();*/
+	glEnd();
+#endif
 
 	// Scale from feet to inches
-	mat4 m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
+	m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
 
 	// Make scale a little bigger while debugging
 	//mat4 m = scale(modelview_matrix, vec3(0.15f, 0.15f, 0.15f));
@@ -203,8 +213,9 @@ void DisplayFunc()
 		return;
 
 	assert(stool1 != NULL);
-	glEnable(GL_DEPTH_TEST);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_CULL_FACE);
+	//glEnable(GL_DEPTH_TEST);
+	glPolygonMode(GL_FRONT_AND_BACK, window.wireframe ? GL_LINE : GL_FILL);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, window.size.x, window.size.y);
@@ -236,6 +247,8 @@ int main(int argc, char * argv[])
 	glutSpecialFunc(SpecialFunc);
 	glutCloseFunc(CloseFunc);
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
+
+	window.wireframe = true;
 
 	// Initialize 1st person camera
 	mainCamera.rotX = 0.0;

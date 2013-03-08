@@ -4,7 +4,7 @@
 using namespace std;
 using namespace glm;
 
-#define DRAW_POINTS (0)
+//#define DRAW_POINTS (1)
 
 // Units are in inches
 const float Stool::LEG_OFFSET = 5.898f;
@@ -71,13 +71,14 @@ bool Stool::Initialize()
 	InitLeg(vec3(0.0f, 0.0f, -LEG_OFFSET), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f));
 	InitLeg(vec3(-LEG_OFFSET, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
 
+	InitRingSupport(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), 1.0f);
+
 
 	//      The vertex array serves as a handle for the whole bundle.
 	glGenVertexArrays(1, &this->vertex_array_handle);
 	glBindVertexArray(this->vertex_array_handle);
 
 	//      The vertex buffer serves as a container for the memory to be defined.
-
 	glGenBuffers(1, &this->vertex_coordinate_handle);
 	glBindBuffer(GL_ARRAY_BUFFER, this->vertex_coordinate_handle);
 	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(VertexAttributes), &this->vertices[0], GL_STATIC_DRAW);
@@ -119,8 +120,10 @@ void Stool::InitLeg(vec3 center, vec3 up, vec3 right)
 	// Units are in inches
 	float width = 1.606f;
 	float height = 22.167f;
-	int vertexRows = 111;
-	int vertexCols = 8;
+	//int vertexRows = 111;
+	//int vertexCols = 8;
+	int vertexRows = 10;
+	int vertexCols = 2;
 
 	vec3 up_n = glm::normalize(up);
 	vec3 right_n = glm::normalize(right);
@@ -168,8 +171,12 @@ void Stool::InitLeg(vec3 center, vec3 up, vec3 right)
 	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n - h_2*up_n + (h_2*tanf(angle) + w_2)*norm_n), -rotRight, right_n, width, width, 0.0f, vertexCols, vertexCols);
 
 
-	// Theoretically, the shading should look fine on the side intersections of the legs because we have overalpped the vertices (so they have 2 vertices, each with different normal).
-	// However, this has yet to be tested so it is something we should look for when implementing the shaders.
+	// We will have to see if the shading works correctly. The vertices on the edges of these rhombi will overlap. So there will essentially be two normals on the corners.
+}
+
+void Stool::InitRingSupport(vec3 center, vec3 up, vec3 right, float radius)
+{
+
 }
 
 void Stool::TakeDown()
@@ -179,12 +186,6 @@ void Stool::TakeDown()
 
 void Stool::Draw(const mat4 & projection, mat4 modelview, const ivec2 & size, const float time)
 {
-	// Draw a cube
-	//glColor3d(0.8706, 0.7126, 0.5294);
-	//glLoadMatrixf(value_ptr(modelview));
-	//glutSolidCube(1);
-
-
 	if (this->GLReturnedError("Stool::Draw - on entry"))
 		return;
 
