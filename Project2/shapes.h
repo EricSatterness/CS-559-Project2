@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "vertexattributes.h"
+#include "vectorExtensions.h"
 #include "math.h"
 
 #define PI 3.14159265f

@@ -134,17 +134,45 @@ void defineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_
 
 void defineRing(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices)
 {
+	// Indicates where this shape starts in the vertex array
+	int startPos = vertices.size();
+
 	vec3 center(0.0f, 0.0f, 0.0f);
 	vec3 up(0.0f, 1.0f, 0.0f);
 	vec3 right(1.0f, 0.0f, 0.0f);
 	float innerRadius = 0.1f;
 	float outerRadius = 1.0f;
+	int slices = 20;
+	int stacks = 10;
 
-	int slices = 10;
-	int stacks = 2;
+	vec3 up_n = glm::normalize(up);
+	vec3 right_n = glm::normalize(right);
+	float vertexRowSpacing = 0.2f;
+	float angle = 2*PI/slices;
+	mat3 rMat = createRotationMatrix(up_n, angle);
 	
-	for (int i = 0; i < slices; i++)
-	{
+	// Vertex attributes
+	// Start from top point inline with normal to right and up vector
+	vec3 n = glm::normalize(cross(right_n, up_n));
+	vec3 p = center + n * outerRadius;
+	vec3 c(1.0f, 0.0f, 0.0f);
+	vec2 t(0.0f, 0.0f);
 
+	for (int i = 0; i < stacks; i++)
+	{
+		for (int j = 0; j < slices; j++)
+		{
+			vertices.push_back(VertexAttributes(p, c, n, t));
+			p = p * rMat * outerRadius;
+		}
+		p = p - up_n * vertexRowSpacing;
 	}
+
+	/*for (int i = 0; i < stacks * slices; i++)
+	{
+		vertex_indices.push_back(i);
+	}*/
+
+	// This gets most of the vertices correctly, but it misses the column where the cylinder connects back with itself
+	defineVertexIndices(vertex_indices, stacks, slices, startPos);
 }

@@ -66,12 +66,12 @@ bool Stool::Initialize()
 
 
 	// Create vertices of stool
-	InitLeg(vec3(0.0f, 0.0f, LEG_OFFSET), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f));
-	InitLeg(vec3(LEG_OFFSET, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f));
-	InitLeg(vec3(0.0f, 0.0f, -LEG_OFFSET), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f));
-	InitLeg(vec3(-LEG_OFFSET, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
+	//InitLeg(vec3(0.0f, 0.0f, LEG_OFFSET), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f));
+	//InitLeg(vec3(LEG_OFFSET, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f));
+	//InitLeg(vec3(0.0f, 0.0f, -LEG_OFFSET), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f));
+	//InitLeg(vec3(-LEG_OFFSET, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
 
-	//InitRingSupport();
+	InitRingSupport();
 
 
 	//      The vertex array serves as a handle for the whole bundle.
