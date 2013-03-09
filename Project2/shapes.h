@@ -19,4 +19,5 @@ void defineVertexIndices(vector<GLuint> & vertex_indices, int cols, int rows, in
 //void defineRectangle(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 topleft, int height, int width);
 //void defineCube(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 center, int height, int width);
 void defineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 topleft, vec3 up, vec3 right, float height, float width, float angle, int vertexRows, int vertexCols);
+void defineCylinder(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 center, vec3 up, vec3 right, float radiusTop, float radiusBot, float height, int slices, int stacks);
 void defineRing(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices);

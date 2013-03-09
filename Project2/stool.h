@@ -16,6 +16,8 @@ class Stool : public Object
 private:
 	typedef Object super;
 	static const float LEG_OFFSET;
+	static const float LEG_WIDTH;
+	static const float LEG_HEIGHT;
 
 	int shader_index;
 
@@ -32,6 +34,7 @@ private:
 
 
 	void InitLeg(vec3 center, vec3 up, vec3 right);
+	void InitDiskSupport(vec3 center, vec3 up, vec3 right, float radiusTop, float radiusBot, float height);
 	//void InitRingSupport(vec3 center, vec3 up, vec3 right, float innerRadius, float outerRadius);
 	void InitRingSupport();
 

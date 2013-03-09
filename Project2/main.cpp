@@ -15,7 +15,7 @@
 using namespace std;
 using namespace glm;
 
-//#define DEBUG 1
+#define DEBUG 1
 
 #pragma region Window/Camera Structs
 // Keeps track of data relevant to each individual window
@@ -194,10 +194,10 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 #endif
 
 	// Scale from feet to inches
-	//m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
+	m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
 
 	// Make scale a little bigger while debugging
-	m = scale(modelview_matrix, vec3(1.0f, 1.0f, 1.0f));
+	//m = scale(modelview_matrix, vec3(0.5f, 0.5f, 0.5f));
 
 	// Draw the stools in arbitrary positions
 	//stool1->Draw(window.projection_matrix, window.modelview_matrix, window.size, 0.0f);
