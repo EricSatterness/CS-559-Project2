@@ -137,15 +137,6 @@ void defineCylinder(vector<VertexAttributes> & vertices, vector<GLuint> & vertex
 	// Indicates where this shape starts in the vertex array
 	int startPos = vertices.size();
 
-	/*vec3 center(0.0f, 12.0f, 0.0f);
-	vec3 up(0.0f, 1.0f, 0.0f);
-	vec3 right(1.0f, 0.0f, 0.0f);
-	float radiusTop = 6.0f;
-	float radiusBot = 18.0f;
-	float height = 3.0f;
-	int slices = 8;
-	int stacks = 2;*/
-
 	vec3 up_n = glm::normalize(up);
 	vec3 right_n = glm::normalize(right);
 	vec3 direction_n = glm::normalize(cross(right_n, up_n));

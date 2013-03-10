@@ -14,6 +14,8 @@ const float Stool::LEG_HEIGHT = 22.167f;
 Stool::Stool() : Object()
 {
 	this->shader_index = 0;
+	this->drawNormals = false;
+	this->drawPoints = false;
 }
 
 void Stool::StepShader()
@@ -211,14 +213,24 @@ void Stool::Draw(const mat4 & projection, mat4 modelview, const ivec2 & size, co
 	this->shaders[this->shader_index]->CustomSetup();
 
 	glBindVertexArray(this->vertex_array_handle);
-#if (DRAW_POINTS)
-	glDrawArrays(GL_POINTS, 0, this->vertex_indices.size());
-#else
-	glDrawElements(GL_TRIANGLES, this->vertex_indices.size(), GL_UNSIGNED_INT , &this->vertex_indices[0]);
-#endif
+
+	if (this->drawPoints)
+		glDrawArrays(GL_POINTS, 0, this->vertex_indices.size());
+	else
+		glDrawElements(GL_TRIANGLES, this->vertex_indices.size(), GL_UNSIGNED_INT , &this->vertex_indices[0]);
 
 	glUseProgram(0);
 	glBindVertexArray(0);
+
+	/*if (this->drawNormals)
+	{
+		this->solid_color.Use();
+		this->solid_color.CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
+		glBindVertexArray(this->normal_array_handle);
+		glDrawElements(GL_LINES , this->normal_indices.size(), GL_UNSIGNED_INT , &this->normal_indices[0]);
+		glBindVertexArray(0);
+		glUseProgram(0);
+	}*/
 
 	if (this->GLReturnedError("Stool::Draw - on exit"))
 		return;

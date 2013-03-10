@@ -25,7 +25,7 @@ struct WindowData
 	ivec2 size;
 	float window_aspect;
 	mat4 projection_matrix, modelview_matrix;
-	bool wireframe;
+	bool wireframe, normals, points, debug_mode;
 } window;
 
 // Keeps track of the 1st person camera data
@@ -102,10 +102,10 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		break;
 
 	// Zoom camera in and out
-	case 'n':
+	case '-':
 		mainCamera.zoom -= 1 * zoomSpeed;
 		break;
-	case 'm':
+	case '=':
 		mainCamera.zoom += 1 * zoomSpeed;
 		break;
 
@@ -114,9 +114,17 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		stool1->StepShader();
 		break;
 
-	// Turn on/off wireframe mode
+	// Turn on/off wireframe, normals, and points
 	case 'w':
 		window.wireframe = !window.wireframe;
+		break;
+	case 'n':
+		stool1->drawNormals = !window.normals;
+		window.normals = !window.normals;
+		break;
+	case 'p':
+		stool1->drawPoints = !window.points;
+		window.points = !window.points;
 		break;
 
 	case 'x':
@@ -157,6 +165,11 @@ void SpecialFunc(int key, int x, int y)
 		if (mainCamera.rotY >= 90)
 			mainCamera.rotY = 89;
 		break;
+
+	// Enable/diable debug mode
+	case GLUT_KEY_F1:
+		window.debug_mode = !window.debug_mode;
+		break;
 	}
 }
 
@@ -164,40 +177,43 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 {
 	mat4 m;
 
-#ifdef DEBUG
-	// Draw the main axes
-	glLoadMatrixf(value_ptr(modelview_matrix));
-	glLineWidth(2.0);
-	glBegin(GL_LINES);
-		glColor3f(1,0,0);	glVertex3fv(ORG);	glVertex3fv(XP);
-		glColor3f(0,1,0);	glVertex3fv(ORG);	glVertex3fv(YP);
-		glColor3f(0,0,1);	glVertex3fv(ORG);	glVertex3fv(ZP);
-	glEnd();
+	if (window.debug_mode)
+	{
+		// Draw the main axes
+		glLoadMatrixf(value_ptr(modelview_matrix));
+		glLineWidth(2.0);
+		glBegin(GL_LINES);
+			glColor3f(1,0,0);	glVertex3fv(ORG);	glVertex3fv(XP);
+			glColor3f(0,1,0);	glVertex3fv(ORG);	glVertex3fv(YP);
+			glColor3f(0,0,1);	glVertex3fv(ORG);	glVertex3fv(ZP);
+		glEnd();
 
-	// Draw the grid
-	// It was easier to draw the grid in all positive increments starting from (0,0,0) and then just shift it in order to center it on the modelview_matrix
-	m = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
-	glLoadMatrixf(value_ptr(m));
-	glLineWidth(1.0);
-	glColor3f(1,1,1);
-	glBegin(GL_LINES);
-	float j;
-		for (int i=0; i <= GRIDWIDTH*2; i++)
-		{
-			j = i/2.0f;
-			glVertex3f(j,0,0);
-			glVertex3f(j,0,GRIDWIDTH);
-			glVertex3f(0,0,j);
-			glVertex3f(GRIDWIDTH,0,j);
-		}
-	glEnd();
-#endif
+		// Draw the grid
+		// It was easier to draw the grid in all positive increments starting from (0,0,0) and then just shift it in order to center it on the modelview_matrix
+		m = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
+		glLoadMatrixf(value_ptr(m));
+		glLineWidth(1.0);
+		glColor3f(1,1,1);
+		glBegin(GL_LINES);
+		float j;
+			for (int i=0; i <= GRIDWIDTH*2; i++)
+			{
+				j = i/2.0f;
+				glVertex3f(j,0,0);
+				glVertex3f(j,0,GRIDWIDTH);
+				glVertex3f(0,0,j);
+				glVertex3f(GRIDWIDTH,0,j);
+			}
+		glEnd();
 
-	// Scale from feet to inches
-	m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
-
-	// Make scale a little bigger while debugging
-	//m = scale(modelview_matrix, vec3(0.5f, 0.5f, 0.5f));
+		// Make scale a little bigger while debugging
+		m = scale(modelview_matrix, vec3(0.15f, 0.15f, 0.15f));
+	}
+	else
+	{
+		// Scale from feet to inches
+		m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
+	}
 
 	// Draw the stools in arbitrary positions
 	//stool1->Draw(window.projection_matrix, window.modelview_matrix, window.size, 0.0f);
@@ -214,6 +230,7 @@ void DisplayFunc()
 
 	assert(stool1 != NULL);
 	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CW);
 	//glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT_AND_BACK, window.wireframe ? GL_LINE : GL_FILL);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -248,7 +265,10 @@ int main(int argc, char * argv[])
 	glutCloseFunc(CloseFunc);
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
-	window.wireframe = true;
+	window.wireframe = false;
+	window.normals = false;
+	window.points = false;
+	window.debug_mode = false;
 
 	// Initialize 1st person camera
 	mainCamera.rotX = 0.0;
