@@ -73,7 +73,7 @@ void defineVertexIndices(vector<GLuint> & vertex_indices, int cols, int rows, in
 //	//vertex_indices.push_back(3);
 //}
 
-void defineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 topleft, vec3 up, vec3 right, float height, float width, float angle, int vertexRows, int vertexCols)
+void defineRhombus(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & vertex_indices, vec3 topleft, vec3 up, vec3 right, float height, float width, float angle, int vertexRows, int vertexCols)
 {
 	// Indicates where this shape starts in the vertex array
 	int startPos = vertices.size();
@@ -119,7 +119,7 @@ void defineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_
 	{
 		for (int j = 0; j < vertexCols; j++)
 		{
-			vertices.push_back(VertexAttributes(p, c, n, t));
+			vertices.push_back(VertexAttributesPCNT(p, c, n, t));
 			p = p + right_n * vertexColSpacing;
 		}
 		p = p - up_n * vertexRowSpacing;
@@ -132,7 +132,7 @@ void defineRhombus(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_
 	defineVertexIndices(vertex_indices, vertexRows, vertexCols, startPos);
 }
 
-void defineCylinder(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 center, vec3 up, vec3 right, float radiusTop, float radiusBot, float height, int slices, int stacks)
+void defineCylinder(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & vertex_indices, vec3 center, vec3 up, vec3 right, float radiusTop, float radiusBot, float height, int slices, int stacks)
 {
 	// Indicates where this shape starts in the vertex array
 	int startPos = vertices.size();
@@ -162,7 +162,7 @@ void defineCylinder(vector<VertexAttributes> & vertices, vector<GLuint> & vertex
 	{
 		for (int j = 0; j < slices + 1; j++)
 		{
-			vertices.push_back(VertexAttributes(p, c, n, t));
+			vertices.push_back(VertexAttributesPCNT(p, c, n, t));
 
 			direction_n = glm::normalize(direction_n * rMatCCW);
 			tangent_n = glm::normalize(cross(-direction_n, up_n));
@@ -183,7 +183,7 @@ void defineCylinder(vector<VertexAttributes> & vertices, vector<GLuint> & vertex
 	defineVertexIndices(vertex_indices, stacks + 1, slices + 1, startPos);
 }
 
-void defineRing(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices)
+void defineRing(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & vertex_indices)
 {
 	// Indicates where this shape starts in the vertex array
 	int startPos = vertices.size();
@@ -215,7 +215,7 @@ void defineRing(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_ind
 	{
 		for (int j = 0; j < slices + 1; j++)
 		{
-			vertices.push_back(VertexAttributes(p, c, n, t));
+			vertices.push_back(VertexAttributesPCNT(p, c, n, t));
 			n = glm::normalize(n * rMatCCW);
 			p = n * outerRadius + center;
 			p = p - up_n * vertexRowSpacing * float(i);

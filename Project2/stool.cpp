@@ -14,13 +14,26 @@ const float Stool::LEG_HEIGHT = 22.167f;
 Stool::Stool() : Object()
 {
 	this->shader_index = 0;
-	this->drawNormals = false;
-	this->drawPoints = false;
+	this->draw_normals = false;
+	this->draw_points = false;
 }
 
 void Stool::StepShader()
 {
 	this->shader_index = ++this->shader_index % this->shaders.size();
+}
+
+void Stool::BuildNormalVisualizationGeometry()
+{
+	//float normal_scalar = 0.125f;
+	float normal_scalar = 1.0f;
+    for (int i = 0; i < int(this->vertices.size()); i++)
+    {
+            this->normal_vertices.push_back(VertexAttributesP(this->vertices[i].position));
+            this->normal_vertices.push_back(VertexAttributesP(this->vertices[i].position + this->vertices[i].normal * normal_scalar));
+            this->normal_indices.push_back(this->normal_vertices.size() - 2);
+            this->normal_indices.push_back(this->normal_vertices.size() - 1);
+    }
 }
 
 bool Stool::Initialize()
@@ -71,24 +84,29 @@ bool Stool::Initialize()
 
 	// Create vertices of stool
 	InitLeg(vec3(0.0f, LEG_HEIGHT/2.0f, LEG_OFFSET), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f));
-	InitLeg(vec3(LEG_OFFSET, LEG_HEIGHT/2.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f));
-	InitLeg(vec3(0.0f, LEG_HEIGHT/2.0f, -LEG_OFFSET), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f));
-	InitLeg(vec3(-LEG_OFFSET, LEG_HEIGHT/2.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
+	//InitLeg(vec3(LEG_OFFSET, LEG_HEIGHT/2.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f));
+	//InitLeg(vec3(0.0f, LEG_HEIGHT/2.0f, -LEG_OFFSET), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f));
+	//InitLeg(vec3(-LEG_OFFSET, LEG_HEIGHT/2.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
 
-	InitDiskSupport(vec3(0.0f, LEG_HEIGHT, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 2.295f, 2.524f, 0.918f);
-	InitDiskSupport(vec3(0.0f, LEG_HEIGHT-4.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 3.213f, 3.442f, 0.918f);
+	//InitDiskSupport(vec3(0.0f, LEG_HEIGHT, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 2.295f, 2.524f, 0.918f);
+	//InitDiskSupport(vec3(0.0f, LEG_HEIGHT-4.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 3.213f, 3.442f, 0.918f);
+
+	//defineRhombus(this->vertices, this->vertex_indices, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 2.0f, 2.0f, 0.0f, 2, 2);
+	this->BuildNormalVisualizationGeometry();
 
 	//InitRingSupport();
 
 
-	//      The vertex array serves as a handle for the whole bundle.
-	glGenVertexArrays(1, &this->vertex_array_handle);
-	glBindVertexArray(this->vertex_array_handle);
+	////      The vertex array serves as a handle for the whole bundle.
+	//glGenVertexArrays(1, &this->vertex_array_handle);
+	//glBindVertexArray(this->vertex_array_handle);
 
-	//      The vertex buffer serves as a container for the memory to be defined.
-	glGenBuffers(1, &this->vertex_coordinate_handle);
-	glBindBuffer(GL_ARRAY_BUFFER, this->vertex_coordinate_handle);
-	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(VertexAttributes), &this->vertices[0], GL_STATIC_DRAW);
+	////      The vertex buffer serves as a container for the memory to be defined.
+	//glGenBuffers(1, &this->vertex_coordinate_handle);
+	//glBindBuffer(GL_ARRAY_BUFFER, this->vertex_coordinate_handle);
+	//glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(VertexAttributesPCNT), &this->vertices[0], GL_STATIC_DRAW);
+	if (!this->PostGLInitialize(&this->vertex_array_handle, &this->vertex_coordinate_handle, this->vertices.size() * sizeof(VertexAttributesPCNT), &this->vertices[0]))
+                return false;
 
 	/*
 	This is an example putting all vertex attributes in a single block of member and using 
@@ -102,10 +120,10 @@ bool Stool::Initialize()
 	find the next instance of the attribute (sizeof()) is specified.
 	*/
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexAttributes), (GLvoid *) 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexAttributes), (GLvoid *) (sizeof(vec3)));
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VertexAttributes), (GLvoid *) (sizeof(vec3) * 2));
-	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(VertexAttributes), (GLvoid *) (sizeof(vec3) * 3));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexAttributesPCNT), (GLvoid *) 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexAttributesPCNT), (GLvoid *) (sizeof(vec3)));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VertexAttributesPCNT), (GLvoid *) (sizeof(vec3) * 2));
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(VertexAttributesPCNT), (GLvoid *) (sizeof(vec3) * 3));
 
 	// Each of the attributes to be used must be enabled.
 	glEnableVertexAttribArray(0);
@@ -115,6 +133,17 @@ bool Stool::Initialize()
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	if (this->normal_vertices.size() > 0)
+	{
+		if (!this->PostGLInitialize(&this->normal_array_handle, &this->normal_coordinate_handle, this->normal_vertices.size() * sizeof(VertexAttributesP), &this->normal_vertices[0]))
+			return false;
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexAttributesP), (GLvoid *) 0);
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
 
 	if (this->GLReturnedError("Stool::Initialize - on exit"))
 		return false;
@@ -206,15 +235,16 @@ void Stool::Draw(const mat4 & projection, mat4 modelview, const ivec2 & size, co
 
 	//modelview = rotate(modelview, time * 90.0f, vec3(0.0f, 1.0f, 0.0f));
 	mat4 mvp = projection * modelview;
+	mat3 nm = inverse(transpose(mat3(modelview)));
 
 	this->shaders[this->shader_index]->Use();
 	//TextureManager::Inst()->BindTexture(0, 0);
-	this->shaders[this->shader_index]->CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(transpose(inverse(modelview))));
+	this->shaders[this->shader_index]->CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
 	this->shaders[this->shader_index]->CustomSetup();
 
 	glBindVertexArray(this->vertex_array_handle);
 
-	if (this->drawPoints)
+	if (this->draw_points)
 		glDrawArrays(GL_POINTS, 0, this->vertex_indices.size());
 	else
 		glDrawElements(GL_TRIANGLES, this->vertex_indices.size(), GL_UNSIGNED_INT , &this->vertex_indices[0]);
@@ -222,15 +252,20 @@ void Stool::Draw(const mat4 & projection, mat4 modelview, const ivec2 & size, co
 	glUseProgram(0);
 	glBindVertexArray(0);
 
-	/*if (this->drawNormals)
+	if (this->draw_normals)
 	{
-		this->solid_color.Use();
-		this->solid_color.CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
+		//this->solid_color.Use();
+		//this->solid_color.CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
+		this->shaders[0]->Use();
+		this->shaders[0]->CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
+		this->shaders[0]->CustomSetup();
+
 		glBindVertexArray(this->normal_array_handle);
+		//glDrawArrays(GL_POINTS, 0, this->normal_indices.size());
 		glDrawElements(GL_LINES , this->normal_indices.size(), GL_UNSIGNED_INT , &this->normal_indices[0]);
 		glBindVertexArray(0);
 		glUseProgram(0);
-	}*/
+	}
 
 	if (this->GLReturnedError("Stool::Draw - on exit"))
 		return;

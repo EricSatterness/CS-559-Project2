@@ -119,12 +119,10 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		window.wireframe = !window.wireframe;
 		break;
 	case 'n':
-		stool1->drawNormals = !window.normals;
-		window.normals = !window.normals;
+		stool1->EnableNormals(window.normals = !window.normals);
 		break;
 	case 'p':
-		stool1->drawPoints = !window.points;
-		window.points = !window.points;
+		stool1->EnablePoints(window.points = !window.points);
 		break;
 
 	case 'x':
@@ -229,8 +227,8 @@ void DisplayFunc()
 		return;
 
 	assert(stool1 != NULL);
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CW);
+	//glEnable(GL_CULL_FACE);
+	//glFrontFace(GL_CW);
 	//glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT_AND_BACK, window.wireframe ? GL_LINE : GL_FILL);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);

@@ -35,11 +35,16 @@ Object::~Object()
 {
 	assert(this->vertex_array_handle == GLuint(-1));
 	assert(this->vertex_coordinate_handle == GLuint(-1));
+	assert(this->normal_array_handle == GLuint(-1));
+    assert(this->normal_coordinate_handle == GLuint(-1));
 }
 
 void Object::TakeDown()
 {
+	this->vertices.clear();
 	this->vertex_indices.clear();
+    this->normal_vertices.clear();
+	this->normal_indices.clear();
 
 	if (this->vertex_array_handle != GLuint(-1))
 		glDeleteVertexArrays(1, &this->vertex_array_handle);
@@ -47,7 +52,23 @@ void Object::TakeDown()
 	if (this->vertex_coordinate_handle != GLuint(-1))
 		glDeleteBuffers(1, &this->vertex_coordinate_handle);
 
+	if (this->normal_array_handle != GLuint(-1))
+		glDeleteVertexArrays(1, &this->normal_array_handle);
+
+	if (this->normal_coordinate_handle != GLuint(-1))
+		glDeleteBuffers(1, &this->normal_coordinate_handle);
+
 	this->InternalInitialize();
+}
+
+bool Object::PostGLInitialize(GLuint * vertex_array_handle, GLuint * vertex_coordinate_handle, GLsizeiptr sz, const GLvoid * ptr)
+{
+	glGenVertexArrays(1, vertex_array_handle);
+	glBindVertexArray(*vertex_array_handle);
+	glGenBuffers(1, vertex_coordinate_handle);
+	glBindBuffer(GL_ARRAY_BUFFER, *vertex_coordinate_handle);
+	glBufferData(GL_ARRAY_BUFFER, sz, ptr, GL_STATIC_DRAW);
+	return !this->GLReturnedError("Object::PostGLInitialize - on exit");
 }
 
 bool Object::Initialize()
@@ -59,6 +80,7 @@ bool Object::Initialize()
 void Object::InternalInitialize()
 {
 	this->vertex_array_handle = this->vertex_coordinate_handle = GLuint(-1);
+	this->normal_array_handle = this->normal_coordinate_handle = GLuint(-1);
 }
 
 bool Object::GLReturnedError(char * s)
