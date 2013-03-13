@@ -284,7 +284,7 @@ void defineRing(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & vertex
 	{
 		for (int j = 0; j < slices + 1; j++)
 		{
-			vertices.push_back(VertexAttributes(p, c, n, t));
+			vertices.push_back(VertexAttributesPCNT(p, c, n, t));
 
 			direction_n = glm::normalize(direction_n * rMatCCW);
 			tangent_n = glm::normalize(cross(-direction_n, up_n));

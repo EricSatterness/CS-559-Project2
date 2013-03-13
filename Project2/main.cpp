@@ -205,7 +205,7 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 		glEnd();
 
 		// Make scale a little bigger while debugging
-		m = scale(modelview_matrix, vec3(0.15f, 0.15f, 0.15f));
+		m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
 	}
 	else
 	{
