@@ -99,7 +99,7 @@ void defineRhombus(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & ver
 
 	// Vertex attributes
 	vec3 p = topleft;
-	vec3 n = cross(right_n, up_n);
+	vec3 n = glm::normalize(cross(right_n, up_n));
 	vec3 c(1.0f, 0.0f, 0.0f);
 	vec2 t(0.0f, 0.0f);
 
@@ -132,6 +132,47 @@ void defineRhombus(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & ver
 	defineVertexIndices(vertex_indices, vertexRows, vertexCols, startPos);
 }
 
+void defineDisk(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & vertex_indices, vec3 center, vec3 up, vec3 right, float radius, int slices)
+{
+	// Indicates where this shape starts in the vertex array
+	int startPos = vertices.size();
+
+	vec3 up_n = glm::normalize(up);
+	vec3 right_n = glm::normalize(right);
+	vec3 direction_n = up_n;
+	float rotateAngle = 2*PI/slices;
+
+	// Vertex attributes
+	vec3 p = center;
+	vec3 n = glm::normalize(cross(right_n, up_n));
+	vec3 c(1.0f, 0.0f, 0.0f);
+	vec2 t(0.0f, 0.0f);
+
+	mat3 rMatCCW = createRotationMatrix(n, rotateAngle);
+
+	// Push the center vertex
+	vertices.push_back(VertexAttributesPCNT(p, c, n, t));
+	p = direction_n * radius + center;
+
+	// Push the edge vertices
+	for (int i = 0; i < slices + 1; i++)
+	{
+		vertices.push_back(VertexAttributesPCNT(p, c, n, t));
+
+		direction_n = glm::normalize(direction_n * rMatCCW);
+		p = direction_n * radius + center;
+	}
+	
+	// Push the indices (triangles are composed of center and two neighboring vertices)
+	int end = startPos + slices + 1;
+	for (int i = startPos + 1; i < end; i++)
+	{
+		vertex_indices.push_back(startPos);
+		vertex_indices.push_back(i+1);
+		vertex_indices.push_back(i);
+	}
+}
+
 void defineCylinder(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & vertex_indices, vec3 center, vec3 up, vec3 right, float radiusTop, float radiusBot, float height, int slices, int stacks)
 {
 	// Indicates where this shape starts in the vertex array
@@ -151,7 +192,7 @@ void defineCylinder(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & ve
 	mat3 rMatNormal = createRotationMatrix(tangent_n, -slopeAngle);
 	
 	// Vertex attributes
-	// Start from top point inline with normal to right and up vector
+	// Start from top-center point inline with normal to right and up vector
 	vec3 n = glm::normalize(direction_n * rMatNormal);
 	vec3 p = center + direction_n * radiusCur;
 	vec3 c(1.0f, 0.0f, 0.0f);

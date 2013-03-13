@@ -102,10 +102,10 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		break;
 
 	// Zoom camera in and out
-	case '-':
+	case '=':
 		mainCamera.zoom -= 1 * zoomSpeed;
 		break;
-	case '=':
+	case '-':
 		mainCamera.zoom += 1 * zoomSpeed;
 		break;
 

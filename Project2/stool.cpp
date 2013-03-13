@@ -6,10 +6,20 @@ using namespace glm;
 
 //#define DRAW_POINTS (1)
 
+const vec3 Stool::CENTER(0.0f, 0.0f, 0.0f);
+const vec3 Stool::UP(0.0f, 1.0f, 0.0f);
+const vec3 Stool::RIGHT(1.0f, 0.0f, 0.0f);
+
 // Units are in inches
 const float Stool::LEG_OFFSET = 5.898f;
 const float Stool::LEG_WIDTH = 1.606f;
 const float Stool::LEG_HEIGHT = 22.167f;
+const float Stool::SEAT_RADIUS_BOT = 3.442f;
+const float Stool::SEAT_RADIUS_TOP = 5.875f;
+const float Stool::SEAT_THICKNESS = 0.810f;
+const float Stool::SEAT_OFFSET = 0.8f;
+const float Stool::ROD_RADIUS = 0.521f;
+const float Stool::ROD_HEIGHT = 10.694f;
 
 Stool::Stool() : Object()
 {
@@ -83,18 +93,22 @@ bool Stool::Initialize()
 
 
 	// Create vertices of stool
-	InitLeg(vec3(0.0f, LEG_HEIGHT/2.0f, LEG_OFFSET), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f));
-	//InitLeg(vec3(LEG_OFFSET, LEG_HEIGHT/2.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f));
-	//InitLeg(vec3(0.0f, LEG_HEIGHT/2.0f, -LEG_OFFSET), vec3(0.0f, 1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f));
-	//InitLeg(vec3(-LEG_OFFSET, LEG_HEIGHT/2.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
+	InitLeg(vec3(0.0f, LEG_HEIGHT/2.0f, LEG_OFFSET), UP, vec3(1.0f, 0.0f, 0.0f));
+	InitLeg(vec3(LEG_OFFSET, LEG_HEIGHT/2.0f, 0.0f), UP, vec3(0.0f, 0.0f, -1.0f));
+	InitLeg(vec3(0.0f, LEG_HEIGHT/2.0f, -LEG_OFFSET), UP, vec3(-1.0f, 0.0f, 0.0f));
+	InitLeg(vec3(-LEG_OFFSET, LEG_HEIGHT/2.0f, 0.0f), UP, vec3(0.0f, 0.0f, 1.0f));
 
-	//InitDiskSupport(vec3(0.0f, LEG_HEIGHT, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 2.295f, 2.524f, 0.918f);
-	//InitDiskSupport(vec3(0.0f, LEG_HEIGHT-4.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 3.213f, 3.442f, 0.918f);
-
-	//defineRhombus(this->vertices, this->vertex_indices, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f), 2.0f, 2.0f, 0.0f, 2, 2);
-	this->BuildNormalVisualizationGeometry();
-
+	// Still need to fix issue where a section of the cylinder isn't drawn when we include the stool legs in the scene
+	InitDiskSupport(CENTER + (UP * LEG_HEIGHT), UP, RIGHT, 2.295f, 2.524f, 0.918f);
+	InitDiskSupport(CENTER + (UP * (LEG_HEIGHT - 4.0f)), UP, RIGHT, 3.213f, 3.442f, 0.918f);
+	
 	//InitRingSupport();
+
+	InitSeat();
+
+	InitSeatRod();
+
+	this->BuildNormalVisualizationGeometry();
 
 
 	////      The vertex array serves as a handle for the whole bundle.
@@ -212,7 +226,15 @@ void Stool::InitDiskSupport(vec3 center, vec3 up, vec3 right, float radiusTop, f
 	int slices = 20;
 	int stacks = 2;
 
-	defineCylinder(this->vertices, this->vertex_indices, center, up, right, radiusTop, radiusBot, height, slices, stacks);
+	vec3 right_n = glm::normalize(right);
+	vec3 cylinder_up_n = glm::normalize(up);
+	vec3 disk_up_n = -glm::normalize(cross(right_n, cylinder_up_n));
+	float h_2 = height / 2.0f;
+
+	// Building from top down
+	defineDisk(this->vertices, this->vertex_indices, center, disk_up_n, right_n, radiusTop, slices);
+	defineCylinder(this->vertices, this->vertex_indices, center, cylinder_up_n, right_n, radiusTop, radiusBot, height, slices, stacks);
+	defineDisk(this->vertices, this->vertex_indices, center - (cylinder_up_n * height), disk_up_n, right_n, radiusBot, slices);
 }
 
 void Stool::InitRingSupport()
@@ -221,6 +243,33 @@ void Stool::InitRingSupport()
 	float outerRadius = 1.0f;
 
 	defineRing(this->vertices, this->vertex_indices);
+}
+
+void Stool::InitSeat()
+{
+	int slices = 20;
+	int stacks = 1;
+	float thickness_2 = SEAT_THICKNESS / 2.0f;
+	vec3 topOfSeat = CENTER + (UP * (LEG_HEIGHT + SEAT_THICKNESS + SEAT_OFFSET));
+	vec3 disk_up_n = -glm::normalize(cross(RIGHT, UP));
+
+	// Building from top down
+	defineDisk(this->vertices, this->vertex_indices, topOfSeat, disk_up_n, RIGHT, SEAT_RADIUS_TOP, slices);
+	defineCylinder(this->vertices, this->vertex_indices, topOfSeat, UP, RIGHT, SEAT_RADIUS_TOP, SEAT_RADIUS_TOP, thickness_2, slices, stacks);
+	defineCylinder(this->vertices, this->vertex_indices, topOfSeat - (UP * thickness_2), UP, RIGHT, SEAT_RADIUS_TOP, SEAT_RADIUS_BOT, thickness_2, slices, stacks);
+	defineDisk(this->vertices, this->vertex_indices, topOfSeat - (UP * SEAT_THICKNESS), disk_up_n, RIGHT, SEAT_RADIUS_BOT, slices);
+}
+
+void Stool::InitSeatRod()
+{
+	int slices = 10;
+	int stacks = 5;
+	vec3 topOfRod = CENTER + (UP * (LEG_HEIGHT + SEAT_OFFSET));
+	vec3 disk_up_n = -glm::normalize(cross(RIGHT, UP));
+
+	defineDisk(this->vertices, this->vertex_indices, topOfRod, disk_up_n, RIGHT, ROD_RADIUS, slices);
+	defineCylinder(this->vertices, this->vertex_indices, topOfRod, UP, RIGHT, ROD_RADIUS, ROD_RADIUS, ROD_HEIGHT, slices, stacks);
+	defineDisk(this->vertices, this->vertex_indices, topOfRod - (UP * ROD_HEIGHT), disk_up_n, RIGHT, ROD_RADIUS, slices);
 }
 
 void Stool::TakeDown()
