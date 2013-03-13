@@ -174,6 +174,7 @@ void Stool::InitLeg(vec3 center, vec3 up, vec3 right)
 	//int vertexCols = 8;
 	int vertexRows = 10;
 	int vertexCols = 2;
+	vec3 color(0.8706f, 0.7126f, 0.5294f);
 
 	vec3 up_n = glm::normalize(up);
 	vec3 right_n = glm::normalize(right);
@@ -212,13 +213,13 @@ void Stool::InitLeg(vec3 center, vec3 up, vec3 right)
 
 	// Draw the stool leg while taking into consideration both the center, up, and right vectors
 	// Tilted rectangles
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n + h_2*up_n + (-h_2*tanf(angle) + w_2)*norm_n), tiltedUp, right_n, LEG_HEIGHT/sin(PI/2 - angle), LEG_WIDTH, 0.0f, vertexRows, vertexCols);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center + w_2*right_n + h_2*up_n + (-h_2*tanf(angle) + w_2)*norm_n), up_n, rotRight, LEG_HEIGHT, LEG_WIDTH, -angle, vertexRows, vertexCols);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center + w_2*right_n + h_2*up_n + (-h_2*tanf(angle) - w_2)*norm_n), tiltedUp, -right_n, LEG_HEIGHT/sin(PI/2 - angle), LEG_WIDTH, 0.0f, vertexRows, vertexCols);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n + h_2*up_n + (-h_2*tanf(angle) - w_2)*norm_n), up_n, -rotRight, LEG_HEIGHT, LEG_WIDTH, angle, vertexRows, vertexCols);
+	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n + h_2*up_n + (-h_2*tanf(angle) + w_2)*norm_n), tiltedUp, right_n, LEG_HEIGHT/sin(PI/2 - angle), LEG_WIDTH, 0.0f, vertexRows, vertexCols, color);
+	defineRhombus(this->vertices, this->vertex_indices, vec3(center + w_2*right_n + h_2*up_n + (-h_2*tanf(angle) + w_2)*norm_n), up_n, rotRight, LEG_HEIGHT, LEG_WIDTH, -angle, vertexRows, vertexCols, color);
+	defineRhombus(this->vertices, this->vertex_indices, vec3(center + w_2*right_n + h_2*up_n + (-h_2*tanf(angle) - w_2)*norm_n), tiltedUp, -right_n, LEG_HEIGHT/sin(PI/2 - angle), LEG_WIDTH, 0.0f, vertexRows, vertexCols, color);
+	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n + h_2*up_n + (-h_2*tanf(angle) - w_2)*norm_n), up_n, -rotRight, LEG_HEIGHT, LEG_WIDTH, angle, vertexRows, vertexCols, color);
 	// Top and Bottom
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n + h_2*up_n + (-h_2*tanf(angle) + w_2)*norm_n), -right_n, rotRight, LEG_WIDTH, LEG_WIDTH, 0.0f, vertexCols, vertexCols);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n - h_2*up_n + (h_2*tanf(angle) + w_2)*norm_n), -rotRight, right_n, LEG_WIDTH, LEG_WIDTH, 0.0f, vertexCols, vertexCols);
+	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n + h_2*up_n + (-h_2*tanf(angle) + w_2)*norm_n), -right_n, rotRight, LEG_WIDTH, LEG_WIDTH, 0.0f, vertexCols, vertexCols, color);
+	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n - h_2*up_n + (h_2*tanf(angle) + w_2)*norm_n), -rotRight, right_n, LEG_WIDTH, LEG_WIDTH, 0.0f, vertexCols, vertexCols, color);
 
 
 	// We will have to see if the shading works correctly. The vertices on the edges of these rhombi will overlap. So there will essentially be two normals on the corners.
@@ -228,6 +229,7 @@ void Stool::InitDiskSupport(vec3 center, vec3 up, vec3 right, float radiusTop, f
 {
 	int slices = 20;
 	int stacks = 2;
+	vec3 color(0.0f, 0.5f, 0.0f);
 
 	vec3 right_n = glm::normalize(right);
 	vec3 cylinder_up_n = glm::normalize(up);
@@ -235,44 +237,49 @@ void Stool::InitDiskSupport(vec3 center, vec3 up, vec3 right, float radiusTop, f
 	float h_2 = height / 2.0f;
 
 	// Building from top down
-	defineDisk(this->vertices, this->vertex_indices, center, disk_up_n, right_n, radiusTop, slices);
-	defineCylinder(this->vertices, this->vertex_indices, center, cylinder_up_n, right_n, radiusTop, radiusBot, height, slices, stacks);
-	defineDisk(this->vertices, this->vertex_indices, center - (cylinder_up_n * height), -disk_up_n, right_n, radiusBot, slices);
+	defineDisk(this->vertices, this->vertex_indices, center, disk_up_n, right_n, radiusTop, slices, color);
+	defineCylinder(this->vertices, this->vertex_indices, center, cylinder_up_n, right_n, radiusTop, radiusBot, height, slices, stacks, color);
+	defineDisk(this->vertices, this->vertex_indices, center - (cylinder_up_n * height), -disk_up_n, right_n, radiusBot, slices, color);
 }
 
 void Stool::InitRingSupport()
 {
 	int slices = 20;
 	int stacks = 8;
+	vec3 color(0.5f, 0.0f, 0.0f);
 
-	defineRing(this->vertices, this->vertex_indices, CENTER + (UP * RING_OFFSET), UP, RIGHT, RING_RADIUS_INNER, RING_RADIUS_OUTER, slices, stacks);
+	defineRing(this->vertices, this->vertex_indices, CENTER + (UP * RING_OFFSET), UP, RIGHT, RING_RADIUS_INNER, RING_RADIUS_OUTER, slices, stacks, color);
 }
 
 void Stool::InitSeat()
 {
 	int slices = 20;
 	int stacks = 1;
+	vec3 color(0.0f, 0.0f, 0.5f);
+
 	float thickness_2 = SEAT_THICKNESS / 2.0f;
 	vec3 topOfSeat = CENTER + (UP * (LEG_HEIGHT + SEAT_THICKNESS + SEAT_OFFSET));
 	vec3 disk_up_n = -glm::normalize(cross(RIGHT, UP));
 
 	// Building from top down
-	defineDisk(this->vertices, this->vertex_indices, topOfSeat, disk_up_n, RIGHT, SEAT_RADIUS_TOP, slices);
-	defineCylinder(this->vertices, this->vertex_indices, topOfSeat, UP, RIGHT, SEAT_RADIUS_TOP, SEAT_RADIUS_TOP, thickness_2, slices, stacks);
-	defineCylinder(this->vertices, this->vertex_indices, topOfSeat - (UP * thickness_2), UP, RIGHT, SEAT_RADIUS_TOP, SEAT_RADIUS_BOT, thickness_2, slices, stacks);
-	defineDisk(this->vertices, this->vertex_indices, topOfSeat - (UP * SEAT_THICKNESS), -disk_up_n, RIGHT, SEAT_RADIUS_BOT, slices);
+	defineDisk(this->vertices, this->vertex_indices, topOfSeat, disk_up_n, RIGHT, SEAT_RADIUS_TOP, slices, color);
+	defineCylinder(this->vertices, this->vertex_indices, topOfSeat, UP, RIGHT, SEAT_RADIUS_TOP, SEAT_RADIUS_TOP, thickness_2, slices, stacks, color);
+	defineCylinder(this->vertices, this->vertex_indices, topOfSeat - (UP * thickness_2), UP, RIGHT, SEAT_RADIUS_TOP, SEAT_RADIUS_BOT, thickness_2, slices, stacks, color);
+	defineDisk(this->vertices, this->vertex_indices, topOfSeat - (UP * SEAT_THICKNESS), -disk_up_n, RIGHT, SEAT_RADIUS_BOT, slices, color);
 }
 
 void Stool::InitSeatRod()
 {
 	int slices = 10;
 	int stacks = 5;
+	vec3 color(0.3f, 0.1f, 0.5f);
+
 	vec3 topOfRod = CENTER + (UP * (LEG_HEIGHT + SEAT_OFFSET));
 	vec3 disk_up_n = -glm::normalize(cross(RIGHT, UP));
 
-	defineDisk(this->vertices, this->vertex_indices, topOfRod, disk_up_n, RIGHT, ROD_RADIUS, slices);
-	defineCylinder(this->vertices, this->vertex_indices, topOfRod, UP, RIGHT, ROD_RADIUS, ROD_RADIUS, ROD_HEIGHT, slices, stacks);
-	defineDisk(this->vertices, this->vertex_indices, topOfRod - (UP * ROD_HEIGHT), -disk_up_n, RIGHT, ROD_RADIUS, slices);
+	defineDisk(this->vertices, this->vertex_indices, topOfRod, disk_up_n, RIGHT, ROD_RADIUS, slices, color);
+	defineCylinder(this->vertices, this->vertex_indices, topOfRod, UP, RIGHT, ROD_RADIUS, ROD_RADIUS, ROD_HEIGHT, slices, stacks, color);
+	defineDisk(this->vertices, this->vertex_indices, topOfRod - (UP * ROD_HEIGHT), -disk_up_n, RIGHT, ROD_RADIUS, slices, color);
 }
 
 void Stool::TakeDown()

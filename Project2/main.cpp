@@ -230,7 +230,7 @@ void DisplayFunc()
 	glEnable(GL_CULL_FACE);
 	// Dob't need to change the front face anymore since I fixed the vertex winding to be CCW
 	//glFrontFace(GL_CW);
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT_AND_BACK, window.wireframe ? GL_LINE : GL_FILL);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
