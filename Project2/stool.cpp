@@ -240,9 +240,10 @@ void Stool::InitDiskSupport(vec3 center, vec3 up, vec3 right, float radiusTop, f
 void Stool::InitRingSupport()
 {
 	vec3 center(0.0f, 0.0f, 0.0f);
-	float outerRadius = 1.0f;
+	float outerRadius = 7.0f;
+	float innerRadius = 1.0f;
 
-	defineRing(this->vertices, this->vertex_indices);
+	defineRing(this->vertices, this->vertex_indices, innerRadius, outerRadius);
 }
 
 void Stool::InitSeat()
