@@ -7,22 +7,32 @@ void defineVertexIndices(vector<GLuint> & vertex_indices, int cols, int rows, in
 {
 	int end = startPos + rows*(cols-1);
 
-	// Using CW winding and assuming that vertices are in row-major order
+	// Using CCW winding and assuming that vertices are in row-major order
 	for (int i = startPos; i < end; i++)
 	{
 		// Add a triangle if the vertex isn't the first in a row
-		if (i%rows != 0)
+		if ((i-startPos)%rows != 0)
 		{
-			vertex_indices.push_back(i);
+			// This is a CW winding, we want CCW
+			/*vertex_indices.push_back(i);
 			vertex_indices.push_back(i+rows);
+			vertex_indices.push_back(i+rows-1);*/
+
+			vertex_indices.push_back(i);
 			vertex_indices.push_back(i+rows-1);
+			vertex_indices.push_back(i+rows);
 		}
 		// Add a triangle if the vertex isn't the last in a row
-		if (i%rows != rows-1)
+		if ((i-startPos)%rows != rows-1)
 		{
-			vertex_indices.push_back(i);
+			// This is a CW winding, we want CCW
+			/*vertex_indices.push_back(i);
 			vertex_indices.push_back(i+1);
+			vertex_indices.push_back(i+rows);*/
+
+			vertex_indices.push_back(i);
 			vertex_indices.push_back(i+rows);
+			vertex_indices.push_back(i+1);
 		}
 	}
 }
@@ -168,8 +178,8 @@ void defineDisk(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & vertex
 	for (int i = startPos + 1; i < end; i++)
 	{
 		vertex_indices.push_back(startPos);
-		vertex_indices.push_back(i+1);
 		vertex_indices.push_back(i);
+		vertex_indices.push_back(i+1);
 	}
 }
 
@@ -224,61 +234,124 @@ void defineCylinder(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & ve
 	defineVertexIndices(vertex_indices, stacks + 1, slices + 1, startPos);
 }
 
-void defineRing(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & vertex_indices, float innerRadius, float outerRadius)
+//void defineRing(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & vertex_indices, float innerRadius, float outerRadius)
+//{
+//	// Indicates where this shape starts in the vertex array
+//	int startPos = vertices.size();
+//
+//	vec3 center(0.0f, 0.0f, -0.0f);
+//	vec3 up(0.0f, 1.0f, 0.0f);
+//	vec3 right(1.0f, 0.0f, 0.0f);
+//	int slices = 20;
+//	int stacks = 20;
+//
+//	vec3 up_n = glm::normalize(up);
+//	vec3 right_n = glm::normalize(right);
+//	vec3 direction_n = glm::normalize(cross(right_n, up_n));
+//	float vertexRowSpacing = 0.2f;
+//	float angle = 2*PI/slices;
+//	mat3 rMatCCW = createRotationMatrix(up_n, angle);
+//	mat3 rMatCW = createRotationMatrix(up_n, -angle);
+//	
+//	//float slopeAngle = atanf((radiusBot - radiusTop) / stacks);
+//	float slopeAngle = PI * (360.0f / stacks) / 180;
+//	float radiusCur = outerRadius;
+//	vec3 tangent_n = glm::normalize(cross(-direction_n, up_n));
+//	mat3 rMatNormal = createRotationMatrix(tangent_n, -slopeAngle);
+//
+//	// Vertex attributes
+//	// Start from top point inline with normal to right and up vector
+//	/*
+//	vec3 n = glm::normalize(cross(right_n, up_n));
+//	vec3 p = center + n * outerRadius;
+//	vec3 c(1.0f, 0.0f, 0.0f);
+//	vec2 t(0.0f, 0.0f);
+//	*/
+//	
+//	vec3 n = glm::normalize(direction_n * rMatNormal);
+//	vec3 p = center + direction_n * radiusCur;
+//	vec3 c(1.0f, 0.0f, 0.0f);
+//	vec2 t(0.0f, 0.0f);
+//
+//	/*
+//	// Makes a cylinder with radius equal to outerRadius
+//	for (int i = 0; i < stacks + 1; i++)
+//	{
+//		for (int j = 0; j < slices + 1; j++)
+//		{
+//			vertices.push_back(VertexAttributes(p, c, n, t));
+//			n = glm::normalize(n * rMatCCW);
+//			p = n * outerRadius + center;
+//			p = p - up_n * vertexRowSpacing * float(i);
+//		}
+//		n = glm::normalize(n * rMatAround);
+//		p = n * outerRadius + center;
+//		p = p - up_n * vertexRowSpacing * float(i+1);
+//	}
+//	*/
+//
+//	// Starting over, not even bothering to look at this right now
+//	/*for (int i = 0; i < stacks + 1; i++)
+//	{
+//		for (int j = 0; j < slices + 1; j++)
+//		{
+//			vertices.push_back(VertexAttributesPCNT(p, c, n, t));
+//
+//			direction_n = glm::normalize(direction_n * rMatCCW);
+//			tangent_n = glm::normalize(cross(-direction_n, up_n));
+//			rMatNormal = createRotationMatrix(tangent_n, -slopeAngle);
+//			n = glm::normalize(direction_n * rMatNormal);
+//			p = direction_n * radiusCur + center;
+//			p = p - up_n * vertexRowSpacing * float(i);
+//		}
+//		radiusCur = outerRadius + (i + innerRadius) * tanf(slopeAngle);
+//		direction_n = glm::normalize(direction_n * rMatCW);
+//		tangent_n = glm::normalize(cross(-direction_n, up_n));
+//		slopeAngle += PI * (360.0f / stacks) / 180;
+//		rMatNormal = createRotationMatrix(tangent_n, -slopeAngle);
+//		n = glm::normalize(direction_n * rMatNormal);
+//		p = direction_n * radiusCur + center;
+//		p = p - up_n * vertexRowSpacing * float(i+1);
+//	}
+//
+//	defineVertexIndices(vertex_indices, stacks + 1, slices + 1, startPos);*/
+//}
+
+// Starting over
+void defineRing(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & vertex_indices, vec3 center, vec3 up, vec3 right, float radiusInner, float radiusOuter, int slices, int stacks)
 {
+	/*vec3 center(2.0f, 7.0f, 4.0f);
+	vec3 up(1.0f, 1.0f, 0.0f);
+	vec3 right(1.0f, 0.0f, -1.0f);
+	float radiusInner = 2.0f;
+	float radiusOuter = 10.0f;
+	int slices = 20;
+	int stacks = 20;*/
+
+
+
 	// Indicates where this shape starts in the vertex array
 	int startPos = vertices.size();
-
-	vec3 center(0.0f, 0.0f, -0.0f);
-	vec3 up(0.0f, 1.0f, 0.0f);
-	vec3 right(1.0f, 0.0f, 0.0f);
-	int slices = 20;
-	int stacks = 20;
 
 	vec3 up_n = glm::normalize(up);
 	vec3 right_n = glm::normalize(right);
 	vec3 direction_n = glm::normalize(cross(right_n, up_n));
-	float vertexRowSpacing = 0.2f;
-	float angle = 2*PI/slices;
-	mat3 rMatCCW = createRotationMatrix(up_n, angle);
-	mat3 rMatCW = createRotationMatrix(up_n, -angle);
-	
-	//float slopeAngle = atanf((radiusBot - radiusTop) / stacks);
-	float slopeAngle = PI * (360.0f / stacks) / 180;
-	float radiusCur = outerRadius;
-	vec3 tangent_n = glm::normalize(cross(-direction_n, up_n));
-	mat3 rMatNormal = createRotationMatrix(tangent_n, -slopeAngle);
+	float rotateAngle = 2*PI/slices;
+	mat3 rMatCCW = createRotationMatrix(up_n, rotateAngle);
+	mat3 rMatCW = createRotationMatrix(up_n, -rotateAngle);
 
-	// Vertex attributes
-	// Start from top point inline with normal to right and up vector
-	/*
-	vec3 n = glm::normalize(cross(right_n, up_n));
-	vec3 p = center + n * outerRadius;
-	vec3 c(1.0f, 0.0f, 0.0f);
-	vec2 t(0.0f, 0.0f);
-	*/
+	float slopeAngle = 2*PI/stacks;
+	float radiusCur = radiusOuter + radiusInner;
+	vec3 tangent_n = glm::normalize(cross(-direction_n, up_n));
+	//mat3 rMatNormal = createRotationMatrix(tangent_n, -slopeAngle);
+	mat3 rMatNormal = createRotationMatrix(tangent_n, 0.0f);
 	
+	// Vertex attributes
+	// Start from top-center point inline with normal to right and up vector
 	vec3 n = glm::normalize(direction_n * rMatNormal);
 	vec3 p = center + direction_n * radiusCur;
 	vec3 c(1.0f, 0.0f, 0.0f);
 	vec2 t(0.0f, 0.0f);
-
-	/*
-	// Makes a cylinder with radius equal to outerRadius
-	for (int i = 0; i < stacks + 1; i++)
-	{
-		for (int j = 0; j < slices + 1; j++)
-		{
-			vertices.push_back(VertexAttributes(p, c, n, t));
-			n = glm::normalize(n * rMatCCW);
-			p = n * outerRadius + center;
-			p = p - up_n * vertexRowSpacing * float(i);
-		}
-		n = glm::normalize(n * rMatAround);
-		p = n * outerRadius + center;
-		p = p - up_n * vertexRowSpacing * float(i+1);
-	}
-	*/
 
 	for (int i = 0; i < stacks + 1; i++)
 	{
@@ -288,19 +361,20 @@ void defineRing(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & vertex
 
 			direction_n = glm::normalize(direction_n * rMatCCW);
 			tangent_n = glm::normalize(cross(-direction_n, up_n));
-			rMatNormal = createRotationMatrix(tangent_n, -slopeAngle);
+			rMatNormal = createRotationMatrix(tangent_n, -slopeAngle*i);
 			n = glm::normalize(direction_n * rMatNormal);
-			p = direction_n * radiusCur + center;
-			p = p - up_n * vertexRowSpacing * float(i);
+			// Offset to inside the ring
+			p = direction_n * radiusOuter + center;
+			// Add normal component in up direction to fill ring
+			p = p + n * radiusInner;
 		}
-		radiusCur = outerRadius + (i + innerRadius) * tanf(slopeAngle);
+		//radiusCur = radiusTop + (i + 1) * tanf(slopeAngle);
 		direction_n = glm::normalize(direction_n * rMatCW);
 		tangent_n = glm::normalize(cross(-direction_n, up_n));
-		slopeAngle += PI * (360.0f / stacks) / 180;
-		rMatNormal = createRotationMatrix(tangent_n, -slopeAngle);
+		rMatNormal = createRotationMatrix(tangent_n, -slopeAngle*(i+1));
 		n = glm::normalize(direction_n * rMatNormal);
-		p = direction_n * radiusCur + center;
-		p = p - up_n * vertexRowSpacing * float(i+1);
+		p = direction_n * radiusOuter + center;
+		p = p + n * radiusInner;
 	}
 
 	defineVertexIndices(vertex_indices, stacks + 1, slices + 1, startPos);

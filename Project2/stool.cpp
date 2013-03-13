@@ -20,6 +20,9 @@ const float Stool::SEAT_THICKNESS = 0.810f;
 const float Stool::SEAT_OFFSET = 0.8f;
 const float Stool::ROD_RADIUS = 0.521f;
 const float Stool::ROD_HEIGHT = 10.694f;
+const float Stool::RING_RADIUS_INNER = 0.298f;
+const float Stool::RING_RADIUS_OUTER = 5.952f;
+const float Stool::RING_OFFSET = 6.908f;
 
 Stool::Stool() : Object()
 {
@@ -102,7 +105,7 @@ bool Stool::Initialize()
 	InitDiskSupport(CENTER + (UP * LEG_HEIGHT), UP, RIGHT, 2.295f, 2.524f, 0.918f);
 	InitDiskSupport(CENTER + (UP * (LEG_HEIGHT - 4.0f)), UP, RIGHT, 3.213f, 3.442f, 0.918f);
 	
-	//InitRingSupport();
+	InitRingSupport();
 
 	InitSeat();
 
@@ -234,16 +237,15 @@ void Stool::InitDiskSupport(vec3 center, vec3 up, vec3 right, float radiusTop, f
 	// Building from top down
 	defineDisk(this->vertices, this->vertex_indices, center, disk_up_n, right_n, radiusTop, slices);
 	defineCylinder(this->vertices, this->vertex_indices, center, cylinder_up_n, right_n, radiusTop, radiusBot, height, slices, stacks);
-	defineDisk(this->vertices, this->vertex_indices, center - (cylinder_up_n * height), disk_up_n, right_n, radiusBot, slices);
+	defineDisk(this->vertices, this->vertex_indices, center - (cylinder_up_n * height), -disk_up_n, right_n, radiusBot, slices);
 }
 
 void Stool::InitRingSupport()
 {
-	vec3 center(0.0f, 0.0f, 0.0f);
-	float outerRadius = 7.0f;
-	float innerRadius = 1.0f;
+	int slices = 20;
+	int stacks = 8;
 
-	defineRing(this->vertices, this->vertex_indices, innerRadius, outerRadius);
+	defineRing(this->vertices, this->vertex_indices, CENTER + (UP * RING_OFFSET), UP, RIGHT, RING_RADIUS_INNER, RING_RADIUS_OUTER, slices, stacks);
 }
 
 void Stool::InitSeat()
@@ -258,7 +260,7 @@ void Stool::InitSeat()
 	defineDisk(this->vertices, this->vertex_indices, topOfSeat, disk_up_n, RIGHT, SEAT_RADIUS_TOP, slices);
 	defineCylinder(this->vertices, this->vertex_indices, topOfSeat, UP, RIGHT, SEAT_RADIUS_TOP, SEAT_RADIUS_TOP, thickness_2, slices, stacks);
 	defineCylinder(this->vertices, this->vertex_indices, topOfSeat - (UP * thickness_2), UP, RIGHT, SEAT_RADIUS_TOP, SEAT_RADIUS_BOT, thickness_2, slices, stacks);
-	defineDisk(this->vertices, this->vertex_indices, topOfSeat - (UP * SEAT_THICKNESS), disk_up_n, RIGHT, SEAT_RADIUS_BOT, slices);
+	defineDisk(this->vertices, this->vertex_indices, topOfSeat - (UP * SEAT_THICKNESS), -disk_up_n, RIGHT, SEAT_RADIUS_BOT, slices);
 }
 
 void Stool::InitSeatRod()
@@ -270,7 +272,7 @@ void Stool::InitSeatRod()
 
 	defineDisk(this->vertices, this->vertex_indices, topOfRod, disk_up_n, RIGHT, ROD_RADIUS, slices);
 	defineCylinder(this->vertices, this->vertex_indices, topOfRod, UP, RIGHT, ROD_RADIUS, ROD_RADIUS, ROD_HEIGHT, slices, stacks);
-	defineDisk(this->vertices, this->vertex_indices, topOfRod - (UP * ROD_HEIGHT), disk_up_n, RIGHT, ROD_RADIUS, slices);
+	defineDisk(this->vertices, this->vertex_indices, topOfRod - (UP * ROD_HEIGHT), -disk_up_n, RIGHT, ROD_RADIUS, slices);
 }
 
 void Stool::TakeDown()

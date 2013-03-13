@@ -19,6 +19,7 @@ private:
 	static const float LEG_OFFSET, LEG_WIDTH, LEG_HEIGHT;
 	static const float SEAT_RADIUS_BOT, SEAT_RADIUS_TOP, SEAT_THICKNESS, SEAT_OFFSET;
 	static const float ROD_RADIUS, ROD_HEIGHT;
+	static const float RING_RADIUS_INNER, RING_RADIUS_OUTER, RING_OFFSET;
 
 	int shader_index;
 
