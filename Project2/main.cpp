@@ -275,7 +275,7 @@ void DisplayFunc()
 int main(int argc, char * argv[])
 {
 	glutInit(&argc, argv);
-	glutInitWindowSize(1024, 1024);
+	glutInitWindowSize(1024, 7);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 
 	window.window_handle = glutCreateWindow("1st Person View");
