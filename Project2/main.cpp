@@ -236,8 +236,9 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 	//stool1->Draw(window.projection_matrix, m, window.size, 0.0f);
 	stool1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 
-	m = translate(m, vec3(24.0f, 0.0f, -12.0f));
-	stool2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	// When another stool is drawn, so is the environment surrounding it. Need to build it once, not for each stool.
+	//m = translate(m, vec3(24.0f, 0.0f, -12.0f));
+	//stool2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 
 	glutSwapBuffers();
 	glutPostRedisplay();
@@ -258,7 +259,7 @@ void DisplayFunc()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, window.size.x, window.size.y);
 	glMatrixMode(GL_PROJECTION);
-	window.projection_matrix = perspective(mainCamera.zoom,  window.window_aspect, 1.0f, 10.0f);
+	window.projection_matrix = perspective(mainCamera.zoom,  window.window_aspect, 1.0f, 1000.0f);
 	glLoadMatrixf(value_ptr(window.projection_matrix));
 	glMatrixMode(GL_MODELVIEW);
 	// This allows the user to rotate the camera around the target
@@ -275,7 +276,7 @@ void DisplayFunc()
 int main(int argc, char * argv[])
 {
 	glutInit(&argc, argv);
-	glutInitWindowSize(1024, 7);
+	glutInitWindowSize(1024, 1024);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 
 	window.window_handle = glutCreateWindow("1st Person View");
