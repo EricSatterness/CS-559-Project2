@@ -17,7 +17,14 @@ using namespace glm;
 
 #define DEBUG 1
 
-#pragma region Window/Camera Structs
+#pragma region Data Structs
+// Holds the filenames of a vertex shader and fragement shader
+//struct ShaderFiles
+//{
+//	char * vert;
+//	char * frag;
+//} phong_shader, gouraud_shader, flat_shader, colored_shader, basic_shader;
+
 // Keeps track of data relevant to each individual window
 struct WindowData
 {
@@ -26,6 +33,9 @@ struct WindowData
 	float window_aspect;
 	mat4 projection_matrix, modelview_matrix;
 	bool wireframe, normals, points, debug_mode;
+	int shader_index;
+	//std::vector<ShaderFiles *> shaders;
+	std::vector<Shader *> shaders;
 } window;
 
 // Keeps track of the 1st person camera data
@@ -57,6 +67,7 @@ float zoomSpeed = 0.5f;
 
 // Stool objects to be drawn in the scene
 Stool *stool1;
+Stool *stool2;
 //*stool2, *stool3;
 #pragma endregion
 
@@ -68,6 +79,11 @@ void CloseFunc()
 	{
 		stool1->TakeDown();
 		delete stool1;
+	}
+	if (stool2 != NULL)
+	{
+		stool2->TakeDown();
+		delete stool2;
 	}
 }
 
@@ -111,7 +127,9 @@ void KeyboardFunc(unsigned char c, int x, int y)
 
 	// Step through shaders
 	case 's':
-		stool1->StepShader();
+		window.shader_index = ++window.shader_index % window.shaders.size();
+		//stool1->SetShader(window.shaders[window.shader_index]->frag, window.shaders[window.shader_index]->vert);
+		//stool1->StepShader();
 		break;
 
 	// Turn on/off wireframe, normals, and points
@@ -215,7 +233,11 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 
 	// Draw the stools in arbitrary positions
 	//stool1->Draw(window.projection_matrix, window.modelview_matrix, window.size, 0.0f);
-	stool1->Draw(window.projection_matrix, m, window.size, 0.0f);
+	//stool1->Draw(window.projection_matrix, m, window.size, 0.0f);
+	stool1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+
+	m = translate(m, vec3(24.0f, 0.0f, -12.0f));
+	stool2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 
 	glutSwapBuffers();
 	glutPostRedisplay();
@@ -282,12 +304,50 @@ int main(int argc, char * argv[])
 		return 0;
 	}
 
+	Shader phong_shader, gouraud_shader, flat_shader, colored_shader, basic_shader;
+	if (!phong_shader.Initialize("phong_shader.vert", "phong_shader.frag"))
+		return 0;
+	if (!gouraud_shader.Initialize("gouraud_shader.vert", "gouraud_shader.frag"))
+		return 0;
+	if (!flat_shader.Initialize("flat_shader.vert", "flat_shader.frag"))
+		return 0;
+	if (!colored_shader.Initialize("colored_shader.vert", "colored_shader.frag"))
+		return 0;
+	if (!basic_shader.Initialize("basic_shader.vert", "basic_shader.frag"))
+		return 0;
+	window.shaders.push_back(&phong_shader);
+	window.shaders.push_back(&gouraud_shader);
+	window.shaders.push_back(&flat_shader);
+	window.shaders.push_back(&colored_shader);
+	window.shaders.push_back(&basic_shader);
+
+	/*phong_shader.vert = "phong_shader.vert";
+	phong_shader.frag = "phong_shader.frag";
+	gouraud_shader.vert = "basic_shader.vert";
+	gouraud_shader.frag = "basic_shader.frag";
+
+	window.shader_index = 0;
+	window.shaders.push_back(&phong_shader);
+	window.shaders.push_back(&gouraud_shader);*/
+
 	stool1 =  new Stool();
 	if (!stool1->Initialize())
 	{
 		stool1->TakeDown();
 		return 0;
 	}
+
+	stool2 =  new Stool();
+	if (!stool2->Initialize())
+	{
+		stool2->TakeDown();
+		return 0;
+	}
+
+	//if (!stool1->SetShader(window.shaders[0]->vert, window.shaders[0]->frag))
+	//	return 0;
+	//if (!stool2->SetShader(window.shaders[0]->vert, window.shaders[0]->frag))
+	//	return 0;
 
 	glutMainLoop();
 }

@@ -26,15 +26,33 @@ const float Stool::RING_OFFSET = 6.908f;
 
 Stool::Stool() : Object()
 {
-	this->shader_index = 0;
+	//this->shader_index = 0;
 	this->draw_normals = false;
 	this->draw_points = false;
 }
 
-void Stool::StepShader()
-{
-	this->shader_index = ++this->shader_index % this->shaders.size();
-}
+// After trying nearly every possible way of storing some sort of reference to the shader I realized that you can simply pass the shader pointer in the object's draw method... you don't need to store the shader in the object at all. Hurray!
+//void Stool::StepShader()
+//{
+//	this->shader_index = ++this->shader_index % this->shaders.size();
+//}
+
+//bool Stool::SetShader(char * vertex_shader_file, char * fragment_shader_file)
+//{
+//	this->shader->TakeDown();
+//	delete this->shader;
+//	//this->shader.TakeDown();
+//	//delete this->shader;
+//
+//	//Shader * newShader = new Shader();
+//	//if (!this->shader.Initialize(vertex_shader_file, fragment_shader_file))
+//	//	return false;
+//	//if (!newShader->Initialize(vertex_shader_file, fragment_shader_file))
+//	//	return false;
+//	//this->shader = newShader;
+//
+//	return true;
+//}
 
 void Stool::BuildNormalVisualizationGeometry()
 {
@@ -48,15 +66,21 @@ void Stool::BuildNormalVisualizationGeometry()
 	}
 }
 
+//bool Stool::Initialize(char * vertex_shader_file, char * fragment_shader_file)
 bool Stool::Initialize()
 {
 	if (this->GLReturnedError("Stool::Initialize - on entry"))
 		return false;
 
+	/*Shader * newShader = new Shader();
+	if (!newShader->Initialize(vertex_shader_file, fragment_shader_file))
+		return false;
+	this->shader = newShader;*/
+
 #pragma region Shader code should not be here for better O.O.
 	//Nothing shader related ought to be here for better O.O.
 
-	if (!this->phong_shader.Initialize("phong_shader.vert", "phong_shader.frag"))
+	/*if (!this->phong_shader.Initialize("phong_shader.vert", "phong_shader.frag"))
 		return false;
 
 	if (!this->gouraud_shader.Initialize("gouraud_shader.vert", "gouraud_shader.frag"))
@@ -75,7 +99,7 @@ bool Stool::Initialize()
 	this->shaders.push_back(&this->gouraud_shader);
 	this->shaders.push_back(&this->flat_shader);
 	this->shaders.push_back(&this->colored_shader);
-	this->shaders.push_back(&this->basic_shader);
+	this->shaders.push_back(&this->basic_shader);*/
 #pragma endregion
 
 	// Create vertices of stool
@@ -268,21 +292,32 @@ void Stool::InitSeatRod()
 
 void Stool::TakeDown()
 {
+	//this->shader->TakeDown();
 	super::TakeDown();
 }
 
-void Stool::Draw(const mat4 & projection, mat4 modelview, const ivec2 & size, const float time)
+void Stool::Draw(const mat4 & projection, mat4 modelview, Shader * shader, const ivec2 & size, const float time)
 {
 	if (this->GLReturnedError("Stool::Draw - on entry"))
 		return;
+
+	//Shader shader;
+	//if (!shader.Initialize("phong_shader.vert", "phong_shader.frag"))
+	//	return;
 
 	//modelview = rotate(modelview, time * 90.0f, vec3(0.0f, 1.0f, 0.0f));
 	mat4 mvp = projection * modelview;
 	mat3 nm = inverse(transpose(mat3(modelview)));
 
-	this->shaders[this->shader_index]->Use();
+	/*this->shaders[this->shader_index]->Use();
 	this->shaders[this->shader_index]->CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
-	this->shaders[this->shader_index]->CustomSetup();
+	this->shaders[this->shader_index]->CustomSetup();*/
+	/*shader.Use();
+	shader.CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
+	shader.CustomSetup();*/
+	shader->Use();
+	shader->CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
+	shader->CustomSetup();
 
 	glBindVertexArray(this->vertex_array_handle);
 
@@ -298,15 +333,23 @@ void Stool::Draw(const mat4 & projection, mat4 modelview, const ivec2 & size, co
 	{
 		//this->solid_color.Use();
 		//this->solid_color.CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
-		this->shaders[4]->Use();
+		/*this->shaders[4]->Use();
 		this->shaders[4]->CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
-		this->shaders[4]->CustomSetup();
+		this->shaders[4]->CustomSetup();*/
+		/*shader.Use();
+		shader.CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
+		shader.CustomSetup();*/
+		shader->Use();
+		shader->CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
+		shader->CustomSetup();
 
 		glBindVertexArray(this->normal_array_handle);
 		glDrawElements(GL_LINES , this->normal_indices.size(), GL_UNSIGNED_INT , &this->normal_indices[0]);
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
+
+	//shader.TakeDown();
 
 	if (this->GLReturnedError("Stool::Draw - on exit"))
 		return;
