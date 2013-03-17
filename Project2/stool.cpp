@@ -38,15 +38,14 @@ void Stool::StepShader()
 
 void Stool::BuildNormalVisualizationGeometry()
 {
-	//float normal_scalar = 0.125f;
 	float normal_scalar = 1.0f;
-    for (int i = 0; i < int(this->vertices.size()); i++)
-    {
-            this->normal_vertices.push_back(VertexAttributesP(this->vertices[i].position));
-            this->normal_vertices.push_back(VertexAttributesP(this->vertices[i].position + this->vertices[i].normal * normal_scalar));
-            this->normal_indices.push_back(this->normal_vertices.size() - 2);
-            this->normal_indices.push_back(this->normal_vertices.size() - 1);
-    }
+	for (int i = 0; i < int(this->vertices.size()); i++)
+	{
+		this->normal_vertices.push_back(VertexAttributesP(this->vertices[i].position));
+		this->normal_vertices.push_back(VertexAttributesP(this->vertices[i].position + this->vertices[i].normal * normal_scalar));
+		this->normal_indices.push_back(this->normal_vertices.size() - 2);
+		this->normal_indices.push_back(this->normal_vertices.size() - 1);
+	}
 }
 
 bool Stool::Initialize()
@@ -55,45 +54,29 @@ bool Stool::Initialize()
 		return false;
 
 #pragma region Shader code should not be here for better O.O.
-	//      Nothing shader related ought to be here for better O.O.
+	//Nothing shader related ought to be here for better O.O.
 
-	if (!this->play_shader.Initialize("play_shader.vert", "play_shader.frag"))
+	if (!this->phong_shader.Initialize("phong_shader.vert", "phong_shader.frag"))
 		return false;
 
-	if (!this->basic_shader.Initialize("basic_shader.vert", "basic_shader.frag"))
+	if (!this->gouraud_shader.Initialize("gouraud_shader.vert", "gouraud_shader.frag"))
+		return false;
+
+	if (!this->flat_shader.Initialize("flat_shader.vert", "flat_shader.frag"))
 		return false;
 
 	if (!this->colored_shader.Initialize("colored_shader.vert", "colored_shader.frag"))
 		return false;
 
-	//if (!this->basic_texture_shader.Initialize("basic_texture_shader.vert", "basic_texture_shader.frag"))
-	//        return false;
-
-	if (!this->pattern_shader.Initialize("pattern_shader.vert", "pattern_shader.frag"))
+	if (!this->basic_shader.Initialize("basic_shader.vert", "basic_shader.frag"))
 		return false;
 
-	this->shaders.push_back(&this->basic_shader);
+	this->shaders.push_back(&this->phong_shader);
+	this->shaders.push_back(&this->gouraud_shader);
+	this->shaders.push_back(&this->flat_shader);
 	this->shaders.push_back(&this->colored_shader);
-	//this->shaders.push_back(&this->basic_texture_shader);
-	this->shaders.push_back(&this->pattern_shader);
-	this->shaders.push_back(&this->play_shader);
+	this->shaders.push_back(&this->basic_shader);
 #pragma endregion
-
-	/*
-	#pragma region Code to make FreeImage work
-	//      The picture too, ought not to be here.
-
-	if (!TextureManager::Inst()->LoadTexture((const char *) "stone.jpg", 0))
-	return false;
-
-	//      The current "TextureManager" that comes with FreeImage is quite dumb.
-	glTexEnvf(GL_TEXTURE_ENV , GL_TEXTURE_ENV_MODE , GL_REPLACE);
-	glTexParameterf(GL_TEXTURE_2D , GL_TEXTURE_WRAP_S , GL_CLAMP);
-	glTexParameterf(GL_TEXTURE_2D , GL_TEXTURE_WRAP_T , GL_CLAMP);
-	glTexParameterf(GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_LINEAR);
-	#pragma endregion*/
-
 
 	// Create vertices of stool
 	InitLeg(vec3(0.0f, LEG_HEIGHT/2.0f, LEG_OFFSET), UP, vec3(1.0f, 0.0f, 0.0f));
@@ -101,7 +84,6 @@ bool Stool::Initialize()
 	InitLeg(vec3(0.0f, LEG_HEIGHT/2.0f, -LEG_OFFSET), UP, vec3(-1.0f, 0.0f, 0.0f));
 	InitLeg(vec3(-LEG_OFFSET, LEG_HEIGHT/2.0f, 0.0f), UP, vec3(0.0f, 0.0f, 1.0f));
 
-	// Still need to fix issue where a section of the cylinder isn't drawn when we include the stool legs in the scene
 	InitDiskSupport(CENTER + (UP * LEG_HEIGHT), UP, RIGHT, 2.295f, 2.524f, 0.918f);
 	InitDiskSupport(CENTER + (UP * (LEG_HEIGHT - 4.0f)), UP, RIGHT, 3.213f, 3.442f, 0.918f);
 	
@@ -111,19 +93,21 @@ bool Stool::Initialize()
 
 	InitSeatRod();
 
+	//InitDiskSupport(CENTER, UP, RIGHT, 8.0f, 8.0f, 10.0f);
+
 	this->BuildNormalVisualizationGeometry();
 
 
-	////      The vertex array serves as a handle for the whole bundle.
+	////The vertex array serves as a handle for the whole bundle.
 	//glGenVertexArrays(1, &this->vertex_array_handle);
 	//glBindVertexArray(this->vertex_array_handle);
 
-	////      The vertex buffer serves as a container for the memory to be defined.
+	////The vertex buffer serves as a container for the memory to be defined.
 	//glGenBuffers(1, &this->vertex_coordinate_handle);
 	//glBindBuffer(GL_ARRAY_BUFFER, this->vertex_coordinate_handle);
 	//glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(VertexAttributesPCNT), &this->vertices[0], GL_STATIC_DRAW);
 	if (!this->PostGLInitialize(&this->vertex_array_handle, &this->vertex_coordinate_handle, this->vertices.size() * sizeof(VertexAttributesPCNT), &this->vertices[0]))
-                return false;
+		return false;
 
 	/*
 	This is an example putting all vertex attributes in a single block of member and using 
@@ -297,7 +281,6 @@ void Stool::Draw(const mat4 & projection, mat4 modelview, const ivec2 & size, co
 	mat3 nm = inverse(transpose(mat3(modelview)));
 
 	this->shaders[this->shader_index]->Use();
-	//TextureManager::Inst()->BindTexture(0, 0);
 	this->shaders[this->shader_index]->CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
 	this->shaders[this->shader_index]->CustomSetup();
 
@@ -315,12 +298,11 @@ void Stool::Draw(const mat4 & projection, mat4 modelview, const ivec2 & size, co
 	{
 		//this->solid_color.Use();
 		//this->solid_color.CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
-		this->shaders[0]->Use();
-		this->shaders[0]->CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
-		this->shaders[0]->CustomSetup();
+		this->shaders[4]->Use();
+		this->shaders[4]->CommonSetup(time, value_ptr(size), value_ptr(projection), value_ptr(modelview), value_ptr(mvp), value_ptr(nm));
+		this->shaders[4]->CustomSetup();
 
 		glBindVertexArray(this->normal_array_handle);
-		//glDrawArrays(GL_POINTS, 0, this->normal_indices.size());
 		glDrawElements(GL_LINES , this->normal_indices.size(), GL_UNSIGNED_INT , &this->normal_indices[0]);
 		glBindVertexArray(0);
 		glUseProgram(0);

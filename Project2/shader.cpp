@@ -43,7 +43,7 @@ void Shader::CommonSetup(const float time, const GLint * size, const GLfloat * p
 	glUniformMatrix4fv(this->projection_matrix_handle, 1, GL_FALSE, projection);
 	glUniformMatrix4fv(this->modelview_matrix_handle, 1, GL_FALSE, modelview);
 	glUniformMatrix4fv(this->mvp_handle, 1, GL_FALSE, mvp);
-	glUniformMatrix4fv(this->normal_matrix_handle, 1, GL_FALSE, nm);
+	glUniformMatrix3fv(this->normal_matrix_handle, 1, GL_FALSE, nm);
 }
 
 void Shader::Use()

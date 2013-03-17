@@ -36,14 +36,14 @@ Object::~Object()
 	assert(this->vertex_array_handle == GLuint(-1));
 	assert(this->vertex_coordinate_handle == GLuint(-1));
 	assert(this->normal_array_handle == GLuint(-1));
-    assert(this->normal_coordinate_handle == GLuint(-1));
+	assert(this->normal_coordinate_handle == GLuint(-1));
 }
 
 void Object::TakeDown()
 {
 	this->vertices.clear();
 	this->vertex_indices.clear();
-    this->normal_vertices.clear();
+	this->normal_vertices.clear();
 	this->normal_indices.clear();
 
 	if (this->vertex_array_handle != GLuint(-1))

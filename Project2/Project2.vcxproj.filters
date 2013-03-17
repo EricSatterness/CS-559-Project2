@@ -61,12 +61,12 @@
     <None Include="basic_shader.frag" />
     <None Include="colored_shader.vert" />
     <None Include="basic_shader.vert" />
-    <None Include="basic_texture_shader.frag" />
-    <None Include="basic_texture_shader.vert" />
     <None Include="colored_shader.frag" />
-    <None Include="pattern_shader.frag" />
-    <None Include="pattern_shader.vert" />
-    <None Include="play_shader.frag" />
-    <None Include="play_shader.vert" />
+    <None Include="flat_shader.vert" />
+    <None Include="flat_shader.frag" />
+    <None Include="gouraud_shader.vert" />
+    <None Include="gouraud_shader.frag" />
+    <None Include="phong_shader.frag" />
+    <None Include="phong_shader.vert" />
   </ItemGroup>
 </Project>
