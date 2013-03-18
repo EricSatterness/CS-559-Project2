@@ -49,6 +49,7 @@ private:
     void InitWalls();
     void InitBar();
     void InitBartender();
+	void InitArm(vec3 center, vec3 up, vec3 right);
 
 public:
 	Stool();
