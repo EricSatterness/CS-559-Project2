@@ -241,9 +241,9 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 	// Draw the stools in arbitrary positions
 	//stool1->Draw(window.projection_matrix, window.modelview_matrix, window.size, 0.0f);
 	//stool1->Draw(window.projection_matrix, m, window.size, 0.0f);
-	environment->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 	stool1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-
+	
+	environment->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 	// When another stool is drawn, so is the environment surrounding it. Need to build it once, not for each stool.
 	m = translate(m, vec3(24.0f, 0.0f, -12.0f));
 	stool2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
@@ -350,6 +350,13 @@ int main(int argc, char * argv[])
 	if (!stool2->Initialize())
 	{
 		stool2->TakeDown();
+		return 0;
+	}
+
+	environment =  new Environment();
+	if (!environment->Initialize())
+	{
+		environment->TakeDown();
 		return 0;
 	}
 
