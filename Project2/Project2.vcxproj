@@ -80,23 +80,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bar.cpp" />
+    <ClCompile Include="can.cpp" />
     <ClCompile Include="environment.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="object.cpp" />
+    <ClCompile Include="person.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="shapes.cpp" />
     <ClCompile Include="Stool.cpp" />
     <ClCompile Include="vectorExtensions.cpp" />
     <ClCompile Include="vertexattributes.cpp" />
+    <ClCompile Include="walls.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bar.h" />
+    <ClInclude Include="can.h" />
     <ClInclude Include="environment.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="person.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="shapes.h" />
     <ClInclude Include="Stool.h" />
     <ClInclude Include="vectorExtensions.h" />
     <ClInclude Include="vertexattributes.h" />
+    <ClInclude Include="walls.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="basic_shader.frag" />

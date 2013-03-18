@@ -9,6 +9,10 @@
 
 #include "stool.h"
 #include "environment.h"
+#include "person.h"
+#include "bar.h"
+#include "can.h"
+#include "walls.h"
 
 // Useful links
 //http://www.arcsynthesis.org/gltut/index.html
@@ -69,7 +73,13 @@ float zoomSpeed = 0.5f;
 // Stool objects to be drawn in the scene
 Stool *stool1;
 Stool *stool2;
-Environment *environment;
+Stool *stool3;
+Person *person;
+Bar *bar;
+Can *can1;
+Can *can2;
+Can *can3;
+Walls *walls;
 //*stool2, *stool3;
 #pragma endregion
 
@@ -77,10 +87,35 @@ void CloseFunc()
 {
 	window.window_handle = -1;
 
-	if (environment != NULL)
+	if (walls != NULL)
 	{
-		environment->TakeDown();
-		delete stool1;
+		walls->TakeDown();
+		delete walls;
+	}
+	if (person != NULL)
+	{
+		person->TakeDown();
+		delete person;
+	}
+	if (bar != NULL)
+	{
+		bar->TakeDown();
+		delete bar;
+	}
+	if (can1 != NULL)
+	{
+		can1->TakeDown();
+		delete can1;
+	}
+	if (can2 != NULL)
+	{
+		can2->TakeDown();
+		delete can2;
+	}
+	if (can3 != NULL)
+	{
+		can3->TakeDown();
+		delete can3;
 	}
 	if (stool1 != NULL)
 	{
@@ -91,6 +126,11 @@ void CloseFunc()
 	{
 		stool2->TakeDown();
 		delete stool2;
+	}
+	if (stool3 != NULL)
+	{
+		stool3->TakeDown();
+		delete stool3;
 	}
 }
 
@@ -119,9 +159,11 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		break;
 	case 'j':
 		mainCamera.tranX -= 1 * moveSpeed;
+		mainCamera.rotX -= 1 * moveSpeed;
 		break;
 	case 'l':
 		mainCamera.tranX += 1 * moveSpeed;
+		mainCamera.rotX += 1 * moveSpeed;
 		break;
 
 	// Zoom camera in and out
@@ -241,12 +283,24 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 	// Draw the stools in arbitrary positions
 	//stool1->Draw(window.projection_matrix, window.modelview_matrix, window.size, 0.0f);
 	//stool1->Draw(window.projection_matrix, m, window.size, 0.0f);
-	stool1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 	
-	environment->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	walls->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	person->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	bar->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	can1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	m = translate(m, vec3(5.0f, 0.0f, 0.0f));
+	can2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	m = translate(m, vec3(-10.0f, 0.0f, 0.0f));
+	can3->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	m = translate(m, vec3(5.0f, 0.0f, 0.0f));
 	// When another stool is drawn, so is the environment surrounding it. Need to build it once, not for each stool.
-	m = translate(m, vec3(24.0f, 0.0f, -12.0f));
+	// ^Fixed this by taking it out of the stool class...
+	m = translate(m, vec3(0.0f, 0.0f, -24.0f));
+	stool1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	m = translate(m, vec3(24.0f, 0.0f, 0.0f));
 	stool2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	m = translate(m, vec3(-48.0f, 0.0f, 0.0f));
+	stool3->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 
 	glutSwapBuffers();
 	glutPostRedisplay();
@@ -271,10 +325,10 @@ void DisplayFunc()
 	glLoadMatrixf(value_ptr(window.projection_matrix));
 	glMatrixMode(GL_MODELVIEW);
 	// This allows the user to rotate the camera around the target
-	window.modelview_matrix = rotate(mat4(1.0f), mainCamera.rotX, vec3(0.0f, 1.0f, 0.0f));
-	window.modelview_matrix = rotate(window.modelview_matrix, mainCamera.rotY, vec3(1.0f, 0.0f, 0.0f));
+	window.modelview_matrix = rotate(mat4(1.0f), 0.0f, vec3(0.0f, 1.0f, 0.0f));
+	window.modelview_matrix = rotate(window.modelview_matrix, 0.0f, vec3(1.0f, 0.0f, 0.0f));
 	// This allows the user to strafe the camera
-	vec4 eye = window.modelview_matrix * vec4(mainCamera.tranX, 0.0f, mainCamera.tranZ + 8.0f, 1.0f);
+	vec4 eye = window.modelview_matrix * vec4(mainCamera.rotX, mainCamera.rotY, mainCamera.tranZ + 8.0f, 1.0f);
 	vec4 target = window.modelview_matrix * vec4(mainCamera.tranX, 0.0f, mainCamera.tranZ, 1.0f);
 	window.modelview_matrix = lookAt(vec3(eye), vec3(target), vec3(0.0f, 1.0f, 0.0f));
 
@@ -345,18 +399,57 @@ int main(int argc, char * argv[])
 		stool1->TakeDown();
 		return 0;
 	}
-
+	
 	stool2 =  new Stool();
 	if (!stool2->Initialize())
 	{
 		stool2->TakeDown();
 		return 0;
 	}
-
-	environment =  new Environment();
-	if (!environment->Initialize())
+	stool3 =  new Stool();
+	if (!stool3->Initialize())
 	{
-		environment->TakeDown();
+		stool3->TakeDown();
+		return 0;
+	}
+
+	walls =  new Walls();
+	if (!walls->Initialize())
+	{
+		walls->TakeDown();
+		return 0;
+	}
+
+	person =  new Person();
+	if (!person->Initialize())
+	{
+		person->TakeDown();
+		return 0;
+	}
+	
+	bar =  new Bar();
+	if (!bar->Initialize())
+	{
+		bar->TakeDown();
+		return 0;
+	}
+	
+	can1 =  new Can();
+	if (!can1->Initialize())
+	{
+		can1->TakeDown();
+		return 0;
+	}
+	can2 =  new Can();
+	if (!can2->Initialize())
+	{
+		can2->TakeDown();
+		return 0;
+	}
+	can3 =  new Can();
+	if (!can3->Initialize())
+	{
+		can3->TakeDown();
 		return 0;
 	}
 
