@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "stool.h"
+#include "environment.h"
 
 // Useful links
 //http://www.arcsynthesis.org/gltut/index.html
@@ -68,6 +69,7 @@ float zoomSpeed = 0.5f;
 // Stool objects to be drawn in the scene
 Stool *stool1;
 Stool *stool2;
+Environment *environment;
 //*stool2, *stool3;
 #pragma endregion
 
@@ -75,6 +77,11 @@ void CloseFunc()
 {
 	window.window_handle = -1;
 
+	if (environment != NULL)
+	{
+		environment->TakeDown();
+		delete stool1;
+	}
 	if (stool1 != NULL)
 	{
 		stool1->TakeDown();
@@ -234,11 +241,12 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 	// Draw the stools in arbitrary positions
 	//stool1->Draw(window.projection_matrix, window.modelview_matrix, window.size, 0.0f);
 	//stool1->Draw(window.projection_matrix, m, window.size, 0.0f);
+	environment->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 	stool1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 
 	// When another stool is drawn, so is the environment surrounding it. Need to build it once, not for each stool.
-	//m = translate(m, vec3(24.0f, 0.0f, -12.0f));
-	//stool2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	m = translate(m, vec3(24.0f, 0.0f, -12.0f));
+	stool2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 
 	glutSwapBuffers();
 	glutPostRedisplay();

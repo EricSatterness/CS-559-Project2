@@ -80,6 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="environment.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="object.cpp" />
     <ClCompile Include="shader.cpp" />
@@ -89,6 +90,7 @@
     <ClCompile Include="vertexattributes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="environment.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="shapes.h" />

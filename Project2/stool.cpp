@@ -23,16 +23,6 @@ const float Stool::ROD_HEIGHT = 10.694f;
 const float Stool::RING_RADIUS_INNER = 0.298f;
 const float Stool::RING_RADIUS_OUTER = 5.952f;
 const float Stool::RING_OFFSET = 6.908f;
-const float Stool::CAN_HEIGHT = 1.0f;
-const float Stool::CAN_RADIUS = 0.3f;
-const float Stool::BAR_HEIGHT = 29.0f;
-const float Stool::BAR_WIDTH = 40.0f;
-const float Stool::BAR_DEPTH = 7.0f;
-const float Stool::SPINE_HEIGHT = 20.0f;
-const float Stool::HEAD_LENGTH = 2.0f;
-const float Stool::HEAD_RADIUS = 2.5f;
-const float Stool::WALLS_HEIGHT = 50.0f;
-const float Stool::WALLS_WIDTH = 100.0f;
 
 Stool::Stool() : Object()
 {
@@ -126,12 +116,6 @@ bool Stool::Initialize()
 	InitSeat();
 
 	InitSeatRod();
-
-    InitWalls();
-
-    InitBar();
-
-	InitBartender();
 
 	//InitDiskSupport(CENTER, UP, RIGHT, 8.0f, 8.0f, 10.0f);
 
@@ -306,168 +290,6 @@ void Stool::InitSeatRod()
 	defineDisk(this->vertices, this->vertex_indices, topOfRod - (UP * ROD_HEIGHT), -disk_up_n, RIGHT, ROD_RADIUS, slices, color);
 }
 
-void Stool::InitWalls()
-{
-    int vertexRows = 100;
-	int vertexCols = 100;
-	float w_2 = WALLS_WIDTH / 2.0f;
-    vec3 color(0.3141f, 0.4626f, 0.0628f);
-
-    vec3 up_n = glm::normalize(UP);
-	vec3 right_n = glm::normalize(RIGHT);
-	vec3 norm_n = glm::normalize(cross(right_n, up_n));
-	float rotateAngle = 2.0f*PI/4.0f;
-	mat3 rMatAroundUp = createRotationMatrix(up_n, rotateAngle);
-	mat3 rMatAroundUp2 = createRotationMatrix(up_n, -PI/2.0f);
-	vec3 rotRight = glm::normalize(rMatAroundUp2 * right_n);
-
-    defineRhombus(this->vertices, this->vertex_indices, vec3(w_2, WALLS_HEIGHT, w_2), up_n, -right_n, WALLS_HEIGHT, WALLS_WIDTH, 0.0f, vertexRows, vertexCols, color);
-    defineRhombus(this->vertices, this->vertex_indices, vec3(-w_2, WALLS_HEIGHT, w_2), up_n, right_n * rMatAroundUp, WALLS_HEIGHT, WALLS_WIDTH, 0.0f, vertexRows, vertexCols, color);
-    defineRhombus(this->vertices, this->vertex_indices, vec3(-w_2, WALLS_HEIGHT, -w_2), up_n, right_n, WALLS_HEIGHT, WALLS_WIDTH, 0.0f, vertexRows, vertexCols, color);
-    defineRhombus(this->vertices, this->vertex_indices, vec3(w_2, WALLS_HEIGHT, -w_2), up_n, right_n * -rMatAroundUp, WALLS_HEIGHT, WALLS_WIDTH, 0.0f, vertexRows, vertexCols, color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(-w_2, 0.0f, w_2), -right_n, rotRight, WALLS_HEIGHT * 2.0f, WALLS_WIDTH, 0.0f, vertexRows, vertexCols, color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(-w_2, WALLS_HEIGHT, w_2), -rotRight, right_n, WALLS_HEIGHT * 2.0f, WALLS_WIDTH, 0.0f, vertexRows, vertexCols, color);
-}
-
-void Stool::InitBar()
-{
-    int vertexRows = 10;
-    int vertexCols = 10;
-    int slices = 20;
-    int stacks = 5;
-	float w_2 = BAR_WIDTH / 2.0f;
-	float bar_offset = 30.0f;
-	float depth = BAR_DEPTH + bar_offset;
-	float can_depth_offset = depth + (BAR_DEPTH / 2.0f);
-	float can_side_offset = BAR_WIDTH / 4.0f;
-    vec3 can_color(0.0317f, 0.0620f, 0.5678f);
-	vec3 bar_color(0.2450f, 0.1405f, 0.0745f);
-
-    vec3 up_n = glm::normalize(UP);
-	vec3 right_n = glm::normalize(RIGHT);
-	vec3 norm_n = glm::normalize(cross(right_n, up_n));
-
-    vec3 canMove1(can_side_offset, 0.0f, -can_depth_offset);
-	vec3 canMove2(0.0f, 0.0f, -can_depth_offset);
-	vec3 canMove3(-can_side_offset, 0.0f, -can_depth_offset);
-    vec3 topOfCan = CENTER + (UP * (BAR_HEIGHT + CAN_HEIGHT));
-	vec3 disk_up_n = -glm::normalize(cross(RIGHT, UP));
-
-	float rotateAngle = 2.0f*PI/4.0f;
-	mat3 rMatAroundUp = createRotationMatrix(up_n, rotateAngle);
-	vec3 rotRight = glm::normalize(rMatAroundUp * up_n);
-
-    //front faces
-	defineRhombus(this->vertices, this->vertex_indices, vec3(-w_2, BAR_HEIGHT, -depth), up_n, right_n, BAR_HEIGHT, BAR_WIDTH, 0.0f, vertexRows, vertexCols, bar_color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(-w_2, BAR_HEIGHT, -(bar_offset + BAR_DEPTH / 2.0f)), up_n, right_n, BAR_HEIGHT * 0.07f, BAR_WIDTH, 0.0f, vertexRows, vertexCols, bar_color);
-    //left faces
-    defineRhombus(this->vertices, this->vertex_indices, vec3(w_2, BAR_HEIGHT, -depth), up_n, right_n * rMatAroundUp, BAR_HEIGHT, BAR_DEPTH, 0.0f, vertexRows, vertexCols, bar_color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(w_2, BAR_HEIGHT, -(bar_offset + BAR_DEPTH / 2.0f)), up_n, right_n * rMatAroundUp, BAR_HEIGHT * 0.07f, BAR_DEPTH / 2.0f, 0.0f, vertexRows, vertexCols, bar_color);
-    //right faces
-    defineRhombus(this->vertices, this->vertex_indices, vec3(-w_2, BAR_HEIGHT, -(depth + BAR_DEPTH)), up_n, -right_n * rMatAroundUp, BAR_HEIGHT, BAR_DEPTH, 0.0f, vertexRows, vertexCols, bar_color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(-w_2, BAR_HEIGHT, -(bar_offset + BAR_DEPTH)), up_n, -right_n * rMatAroundUp, BAR_HEIGHT * 0.07f, BAR_DEPTH / 2.0f, 0.0f, vertexRows, vertexCols, bar_color);
-    //back face
-    defineRhombus(this->vertices, this->vertex_indices, vec3(w_2, BAR_HEIGHT, -(depth + BAR_DEPTH)), up_n, -right_n, BAR_HEIGHT, BAR_WIDTH, 0.0f, vertexRows, vertexCols, bar_color);
-    //bottom faces
-    defineRhombus(this->vertices, this->vertex_indices, vec3(-w_2, 0.0f, -depth), -right_n * rMatAroundUp, right_n, BAR_DEPTH, BAR_WIDTH, 0.0f, vertexRows, vertexCols, bar_color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(-w_2, BAR_HEIGHT - (BAR_HEIGHT * 0.07f), -(bar_offset + BAR_DEPTH / 2.0f)), -right_n * rMatAroundUp, right_n, BAR_DEPTH / 2.0f, BAR_WIDTH, 0.0f, vertexRows, vertexCols, bar_color);
-    //top face
-    defineRhombus(this->vertices, this->vertex_indices, vec3(w_2, BAR_HEIGHT, -(depth - BAR_DEPTH / 2.0f)), -right_n * rMatAroundUp, -right_n, BAR_DEPTH * 1.5f, BAR_WIDTH, 0.0f, vertexRows, vertexCols, bar_color);
-    
-    //beer can 1
-    defineDisk(this->vertices, this->vertex_indices, topOfCan + canMove1, disk_up_n, RIGHT, CAN_RADIUS, slices, can_color);
-	defineCylinder(this->vertices, this->vertex_indices, topOfCan + canMove1, UP, RIGHT, CAN_RADIUS, CAN_RADIUS, CAN_HEIGHT, slices, stacks, can_color);
-	defineDisk(this->vertices, this->vertex_indices, topOfCan - (UP * CAN_HEIGHT) + canMove1, -disk_up_n, RIGHT, CAN_RADIUS, slices, can_color);
-    //beer can 2
-    defineDisk(this->vertices, this->vertex_indices, topOfCan + canMove2, disk_up_n, RIGHT, CAN_RADIUS, slices, can_color);
-	defineCylinder(this->vertices, this->vertex_indices, topOfCan + canMove2, UP, RIGHT, CAN_RADIUS, CAN_RADIUS, CAN_HEIGHT, slices, stacks, can_color);
-	defineDisk(this->vertices, this->vertex_indices, topOfCan - (UP * CAN_HEIGHT) + canMove2, -disk_up_n, RIGHT, CAN_RADIUS, slices, can_color);
-    //beer can 3
-    defineDisk(this->vertices, this->vertex_indices, topOfCan + canMove3, disk_up_n, RIGHT, CAN_RADIUS, slices, can_color);
-	defineCylinder(this->vertices, this->vertex_indices, topOfCan + canMove3, UP, RIGHT, CAN_RADIUS, CAN_RADIUS, CAN_HEIGHT, slices, stacks, can_color);
-	defineDisk(this->vertices, this->vertex_indices, topOfCan - (UP * CAN_HEIGHT) + canMove3, -disk_up_n, RIGHT, CAN_RADIUS, slices, can_color);
-}
-
-void Stool::InitBartender()
-{
-    int vertexRows = 10;
-    int vertexCols = 10;
-    int slices = 30;
-    int stacks = 5;
-    float angle = 15.0f*PI/180.0f;
-	float w_2 = LEG_WIDTH / 2.0f;
-	float h_2 = SPINE_HEIGHT / 2.0f;
-	float bar_offset = 30.0f;
-	float bartender_offset = bar_offset + BAR_DEPTH * 2.5f;
-	float bartender_height = LEG_HEIGHT * 0.75f;
-	float tender_top = SPINE_HEIGHT + bartender_height + HEAD_RADIUS;
-	float leg_offset = LEG_HEIGHT * 0.375f;
-    vec3 color(1.0f, 1.0f, 1.0f);
-
-    vec3 up_n = glm::normalize(UP);
-	vec3 right_n = glm::normalize(RIGHT);
-
-    vec3 canMove(0.0f, 0.0f, 2.0f);
-    vec3 topOfCan = CENTER + (UP * (BAR_HEIGHT + CAN_HEIGHT));
-	vec3 disk_up_n = -glm::normalize(cross(RIGHT, UP));
-
-    mat3 rMatAroundRight = createRotationMatrix(right_n, angle);
-	mat3 rMatAroundUp = createRotationMatrix(up_n, -PI/2.0f);
-	vec3 tiltedUp = glm::normalize(rMatAroundRight * up_n);
-	vec3 rotRight = glm::normalize(rMatAroundUp * right_n);
-
-    //head -- need to rotate so it's like a can on it's side
-	defineDisk(this->vertices, this->vertex_indices, vec3(0.0f, tender_top, -bartender_offset), up_n, right_n, HEAD_RADIUS, slices, color);
-	defineCylinder(this->vertices, this->vertex_indices, vec3(0.0f, tender_top, -bartender_offset), -rotRight, up_n, HEAD_RADIUS, HEAD_RADIUS, HEAD_LENGTH, slices, stacks, color);
-	defineDisk(this->vertices, this->vertex_indices, vec3(0.0f, tender_top, -bartender_offset - HEAD_LENGTH), up_n, -right_n, HEAD_RADIUS, slices, color);
-
-    //spine
-    defineRhombus(this->vertices, this->vertex_indices, vec3(-LEG_WIDTH / 2.0f, SPINE_HEIGHT + bartender_height, -bartender_offset), up_n, right_n, SPINE_HEIGHT, LEG_WIDTH, 0.0f, vertexRows, vertexCols, color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(LEG_WIDTH / 2.0f, SPINE_HEIGHT + bartender_height, -bartender_offset), up_n, rotRight, SPINE_HEIGHT, LEG_WIDTH, 0.0f, vertexRows, vertexCols, color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(LEG_WIDTH / 2.0f, SPINE_HEIGHT + bartender_height, -bartender_offset - LEG_WIDTH), up_n, -right_n, SPINE_HEIGHT, LEG_WIDTH, 0.0f, vertexRows, vertexCols, color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(-LEG_WIDTH / 2.0f, SPINE_HEIGHT + bartender_height, -bartender_offset - LEG_WIDTH), up_n, -rotRight, SPINE_HEIGHT, LEG_WIDTH, 0.0f, vertexRows, vertexCols, color);
-	// Top and Bottom
-	defineRhombus(this->vertices, this->vertex_indices, vec3(-LEG_WIDTH / 2.0f, SPINE_HEIGHT + bartender_height, -bartender_offset), -right_n, rotRight, LEG_WIDTH, LEG_WIDTH, 0.0f, vertexCols, vertexCols, color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(-LEG_WIDTH / 2.0f, bartender_height, -bartender_offset), -rotRight, right_n, LEG_WIDTH, LEG_WIDTH, 0.0f, vertexCols, vertexCols, color);
-
-	//left arm
-	InitArm(vec3(-LEG_WIDTH * 1.5f, SPINE_HEIGHT / 2.0f + bartender_height, -bartender_offset - LEG_WIDTH / 2.0f), UP, vec3(0.0f, 0.0f, 1.0f));
-	//right arm
-	InitArm(vec3(LEG_WIDTH * 1.5f, SPINE_HEIGHT / 2.0f + bartender_height, -bartender_offset - LEG_WIDTH / 2.0f), UP, vec3(0.0f, 0.0f, -1.0f));
-	//left leg
-	InitArm(vec3(-LEG_WIDTH * 1.5f, leg_offset, -bartender_offset - LEG_WIDTH / 2.0f), UP, vec3(0.0f, 0.0f, 1.0f));
-	//right leg
-	InitArm(vec3(LEG_WIDTH * 1.5f, leg_offset, -bartender_offset - LEG_WIDTH / 2.0f), UP, vec3(0.0f, 0.0f, -1.0f));
-    
-}
-
-void Stool::InitArm(vec3 center, vec3 up, vec3 right)
-{
-	int vertexRows = 10;
-	int vertexCols = 2;
-	float arm_height = LEG_HEIGHT * 0.75f;
-	vec3 color(1.0f, 1.0f, 1.0f);
-
-	vec3 up_n = glm::normalize(up);
-	vec3 right_n = glm::normalize(right);
-	vec3 norm_n = glm::normalize(cross(right_n, up_n));
-	float w_2 = LEG_WIDTH / 2.0f;
-	float h_2 = arm_height / 2.0f;
-	float angle = 15.0f*PI/180.0f;
-
-	mat3 rMatAroundRight = createRotationMatrix(right_n, angle);
-	mat3 rMatAroundUp = createRotationMatrix(up_n, -PI/2.0f);
-	vec3 tiltedUp = glm::normalize(rMatAroundRight * up_n);
-	vec3 rotRight = glm::normalize(rMatAroundUp * right_n);
-
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n + h_2*up_n + (-h_2*tanf(angle) + w_2)*norm_n), tiltedUp, right_n, arm_height/sin(PI/2 - angle), LEG_WIDTH, 0.0f, vertexRows, vertexCols, color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center + w_2*right_n + h_2*up_n + (-h_2*tanf(angle) + w_2)*norm_n), up_n, rotRight, arm_height, LEG_WIDTH, -angle, vertexRows, vertexCols, color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center + w_2*right_n + h_2*up_n + (-h_2*tanf(angle) - w_2)*norm_n), tiltedUp, -right_n, arm_height/sin(PI/2 - angle), LEG_WIDTH, 0.0f, vertexRows, vertexCols, color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n + h_2*up_n + (-h_2*tanf(angle) - w_2)*norm_n), up_n, -rotRight, arm_height, LEG_WIDTH, angle, vertexRows, vertexCols, color);
-	// Top and Bottom
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n + h_2*up_n + (-h_2*tanf(angle) + w_2)*norm_n), -right_n, rotRight, LEG_WIDTH, LEG_WIDTH, 0.0f, vertexCols, vertexCols, color);
-	defineRhombus(this->vertices, this->vertex_indices, vec3(center - w_2*right_n - h_2*up_n + (h_2*tanf(angle) + w_2)*norm_n), -rotRight, right_n, LEG_WIDTH, LEG_WIDTH, 0.0f, vertexCols, vertexCols, color);
-}
 
 void Stool::TakeDown()
 {
