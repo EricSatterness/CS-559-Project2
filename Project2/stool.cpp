@@ -292,7 +292,6 @@ void Stool::InitSeatRod()
 	defineDisk(this->vertices, this->vertex_indices, topOfRod - (UP * ROD_HEIGHT), -disk_up_n, RIGHT, ROD_RADIUS, slices, color);
 }
 
-
 void Stool::TakeDown()
 {
 	//this->shader->TakeDown();

@@ -63,12 +63,12 @@ struct CameraData
 
 #pragma region Constants
 // These represent the axes
-const float	ORG[3] = {0,0,0},
-			XP[3] = {5,0,0},
-			YP[3] = {0,5,0},
-			ZP[3] = {0,0,5};
-// Used for constructing the floor grid. Units are in feet
-const float GRIDWIDTH = 10.0;
+//const float	ORG[3] = {0,0,0},
+//			XP[3] = {5,0,0},
+//			YP[3] = {0,5,0},
+//			ZP[3] = {0,0,5};
+//// Used for constructing the floor grid. Units are in feet
+//const float GRIDWIDTH = 10.0;
 #pragma endregion
 
 #pragma region Variables
@@ -84,61 +84,18 @@ Axes *axes;
 Grid *grid;
 Stool *stool1;
 Stool *stool2;
-//Stool *stool3;
-//Person *person;
-//Bar *bar;
-//Can *can1;
-//Can *can2;
-//Can *can3;
-//Walls *walls;
-//*stool2, *stool3;
+Stool *stool3;
+Person *person;
+Bar *bar;
+Can *can1;
+Can *can2;
+Can *can3;
+Walls *walls;
 #pragma endregion
 
 void CloseFunc()
 {
 	window.window_handle = -1;
-
-	/*if (stool1 != NULL)
-	if (walls != NULL)
-	{
-		walls->TakeDown();
-		delete walls;
-	}
-	if (person != NULL)
-	{
-		person->TakeDown();
-		delete person;
-	}
-	if (bar != NULL)
-	{
-		bar->TakeDown();
-		delete bar;
-	}
-	if (can1 != NULL)
-	{
-		can1->TakeDown();
-		delete can1;
-	}
-	if (can2 != NULL)
-	{
-		can2->TakeDown();
-		delete can2;
-	}
-	if (can3 != NULL)
-	{
-		can3->TakeDown();
-		delete can3;
-	}
-	if (stool1 != NULL)
-	{
-		stool1->TakeDown();
-		delete stool1;
-	}
-	if (stool2 != NULL)
-	{
-		stool2->TakeDown();
-		delete stool2;
-	}*/
 
 	if (axes != NULL)
 	{
@@ -150,6 +107,11 @@ void CloseFunc()
 		grid->TakeDown();
 		delete grid;
 	}
+	if (walls != NULL)
+	{
+		walls->TakeDown();
+		delete walls;
+	}
 
 	for (int i = 0; i < (int)window.objects.size(); i++)
 	{
@@ -160,11 +122,6 @@ void CloseFunc()
 		}
 
 	}
-	/*if (stool3 != NULL)
-	{
-		stool3->TakeDown();
-		delete stool3;
-	}*/
 }
 
 void ReshapeFunc(int w, int h)
@@ -250,15 +207,6 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		{
 			window.objects[i]->EnableNormals(window.normals);
 		}
-		/*stool1->EnableNormals(window.normals = !window.normals); //this is kind of working
-		stool2->EnableNormals(window.normals = !window.normals);
-		stool3->EnableNormals(window.normals = !window.normals);
-		can1->EnableNormals(window.normals = !window.normals);
-		can2->EnableNormals(window.normals = !window.normals);
-		can3->EnableNormals(window.normals = !window.normals);
-		bar->EnableNormals(window.normals = !window.normals);
-		walls->EnableNormals(window.normals = !window.normals);
-		person->EnableNormals(window.normals = !window.normals);*/
 		break;
 	case 'p':
 		//stool1->EnablePoints(window.points = !window.points);
@@ -267,14 +215,6 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		{
 			window.objects[i]->EnablePoints(window.points);
 		}
-		/*stool2->EnablePoints(window.points = !window.points);
-		stool3->EnablePoints(window.points = !window.points);
-		can1->EnablePoints(window.points = !window.points);
-		can2->EnablePoints(window.points = !window.points);
-		can3->EnablePoints(window.points = !window.points);
-		bar->EnablePoints(window.points = !window.points);
-		walls->EnablePoints(window.points = !window.points);
-		person->EnablePoints(window.points = !window.points);*/
 		break;
 
 	case 'x':
@@ -406,6 +346,7 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 
 	if (window.debug_mode)
 	{
+		// Converted the axes and grid into objects so that we can use modern gl instead of legacy gl
 		// Draw the main axes
 		/*glLoadMatrixf(value_ptr(modelview_matrix));
 		glLineWidth(2.0);
@@ -452,23 +393,23 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 	//stool1->Draw(window.projection_matrix, window.modelview_matrix, window.size, 0.0f);
 	//stool1->Draw(window.projection_matrix, m, window.size, 0.0f);
 	
-	//walls->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	//person->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	//bar->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	//can1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	//m = translate(m, vec3(5.0f, 0.0f, 0.0f));
-	//can2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	//m = translate(m, vec3(-10.0f, 0.0f, 0.0f));
-	//can3->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	//m = translate(m, vec3(5.0f, 0.0f, 0.0f));
-	//// When another stool is drawn, so is the environment surrounding it. Need to build it once, not for each stool.
-	//// ^Fixed this by taking it out of the stool class...
-	//m = translate(m, vec3(0.0f, 0.0f, -24.0f));
+	walls->Draw(window.projection_matrix, m, window.shaders[0], window.size, 0.0f);
+	person->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	bar->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	can1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	m = translate(m, vec3(5.0f, 0.0f, 0.0f));
+	can2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	m = translate(m, vec3(-10.0f, 0.0f, 0.0f));
+	can3->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	m = translate(m, vec3(5.0f, 0.0f, 0.0f));
+	// When another stool is drawn, so is the environment surrounding it. Need to build it once, not for each stool.
+	// ^Fixed this by taking it out of the stool class...
+	m = translate(m, vec3(0.0f, 0.0f, -24.0f));
 	stool1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	m = translate(m, vec3(24.0f, 0.0f, -12.0f));
+	m = translate(m, vec3(24.0f, 0.0f, 0.0f));
 	stool2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	//m = translate(m, vec3(-48.0f, 0.0f, 0.0f));
-	//stool3->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+	m = translate(m, vec3(-48.0f, 0.0f, 0.0f));
+	stool3->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 
 	/*glutSwapBuffers();
 	glutPostRedisplay();*/
@@ -526,14 +467,14 @@ void DisplayFunc()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, window.size.x, window.size.y);
 	glMatrixMode(GL_PROJECTION);
-	window.projection_matrix = perspective(mainCamera.zoom,  window.window_aspect, 1.0f, 10.0f);
+	window.projection_matrix = perspective(mainCamera.zoom,  window.window_aspect, 1.0f, 40.0f);
 	glLoadMatrixf(value_ptr(window.projection_matrix));
 	glMatrixMode(GL_MODELVIEW);
 	// This allows the user to rotate the camera around the target
 	window.modelview_matrix = rotate(mat4(1.0f), mainCamera.rotX, vec3(0.0f, 1.0f, 0.0f));
 	window.modelview_matrix = rotate(window.modelview_matrix, mainCamera.rotY, vec3(1.0f, 0.0f, 0.0f));
 	// This allows the user to strafe the camera
-	vec4 eye = window.modelview_matrix * vec4(mainCamera.tranX, 0.0f, mainCamera.tranZ + 8.0f, 1.0f);
+	vec4 eye = window.modelview_matrix * vec4(mainCamera.tranX, 0.0f, mainCamera.tranZ + 15.0f, 1.0f);
 	vec4 target = window.modelview_matrix * vec4(mainCamera.tranX, 0.0f, mainCamera.tranZ, 1.0f);
 	window.modelview_matrix = lookAt(vec3(eye), vec3(target), vec3(0.0f, 1.0f, 0.0f));
 
@@ -621,65 +562,18 @@ int main(int argc, char * argv[])
 		stool1->TakeDown();
 		return 0;
 	}
-	
 	stool2 =  new Stool();
 	if (!stool2->Initialize())
 	{
 		stool2->TakeDown();
 		return 0;
-	}*/
-	/*stool3 =  new Stool();
-	if (!stool3->Initialize())
-	{
-		stool3->TakeDown();
-		return 0;
 	}
+	if (!stool1->SetShader(window.shaders[0]->vert, window.shaders[0]->frag))
+		return 0;
+	if (!stool2->SetShader(window.shaders[0]->vert, window.shaders[0]->frag))
+		return 0;*/
 
-	walls =  new Walls();
-	if (!walls->Initialize())
-	{
-		walls->TakeDown();
-		return 0;
-	}
-
-	person =  new Person();
-	if (!person->Initialize())
-	{
-		person->TakeDown();
-		return 0;
-	}
-	
-	bar =  new Bar();
-	if (!bar->Initialize())
-	{
-		bar->TakeDown();
-		return 0;
-	}
-	
-	can1 =  new Can();
-	if (!can1->Initialize())
-	{
-		can1->TakeDown();
-		return 0;
-	}
-	can2 =  new Can();
-	if (!can2->Initialize())
-	{
-		can2->TakeDown();
-		return 0;
-	}
-	can3 =  new Can();
-	if (!can3->Initialize())
-	{
-		can3->TakeDown();
-		return 0;
-	}*/
-
-	//if (!stool1->SetShader(window.shaders[0]->vert, window.shaders[0]->frag))
-	//	return 0;
-	//if (!stool2->SetShader(window.shaders[0]->vert, window.shaders[0]->frag))
-	//	return 0;
-
+	// Any objects that don't need to have normals displayed should be kept out of the main objects list
 	axes = new Axes();
 	if (!axes->Initialize())
 	{
@@ -694,12 +588,31 @@ int main(int argc, char * argv[])
 		delete grid;
 		return 0;
 	}
+	walls =  new Walls();
+	if (!walls->Initialize())
+	{
+		walls->TakeDown();
+		delete walls;
+		return 0;
+	}
 
 	stool1 = new Stool();
 	stool2 = new Stool();
+	stool3 = new Stool();
+	person =  new Person();
+	bar =  new Bar();
+	can1 =  new Can();
+	can2 =  new Can();
+	can3 =  new Can();
 
 	window.objects.push_back(stool1);
 	window.objects.push_back(stool2);
+	window.objects.push_back(stool3);
+	window.objects.push_back(person);
+	window.objects.push_back(bar);
+	window.objects.push_back(can1);
+	window.objects.push_back(can2);
+	window.objects.push_back(can3);
 
 	for (int i = 0; i < (int)window.objects.size(); i++)
 	{

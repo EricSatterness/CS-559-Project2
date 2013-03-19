@@ -4,8 +4,6 @@
 using namespace std;
 using namespace glm;
 
-//#define DRAW_POINTS (1)
-
 const vec3 Bar::CENTER(0.0f, 0.0f, 0.0f);
 const vec3 Bar::UP(0.0f, 1.0f, 0.0f);
 const vec3 Bar::RIGHT(1.0f, 0.0f, 0.0f);
@@ -24,14 +22,7 @@ Bar::Bar() : Object()
 
 void Bar::BuildNormalVisualizationGeometry()
 {
-	float normal_scalar = 1.0f;
-	for (int i = 0; i < int(this->vertices.size()); i++)
-	{
-		this->normal_vertices.push_back(VertexAttributesP(this->vertices[i].position));
-		this->normal_vertices.push_back(VertexAttributesP(this->vertices[i].position + this->vertices[i].normal * normal_scalar));
-		this->normal_indices.push_back(this->normal_vertices.size() - 2);
-		this->normal_indices.push_back(this->normal_vertices.size() - 1);
-	}
+	super::BuildNormalVisualizationGeometry();
 }
 
 bool Bar::Initialize()

@@ -20,10 +20,6 @@ private:
 	static const float SEAT_RADIUS_BOT, SEAT_RADIUS_TOP, SEAT_THICKNESS, SEAT_OFFSET;
 	static const float ROD_RADIUS, ROD_HEIGHT;
 	static const float RING_RADIUS_INNER, RING_RADIUS_OUTER, RING_OFFSET;
-    static const float CAN_HEIGHT, CAN_RADIUS;
-    static const float BAR_HEIGHT, BAR_WIDTH, BAR_DEPTH;
-    static const float WALLS_WIDTH, WALLS_HEIGHT;
-    static const float HEAD_RADIUS, HEAD_LENGTH, SPINE_HEIGHT;
 
 	//int shader_index;
 
@@ -46,10 +42,6 @@ private:
 	void InitRingSupport();
 	void InitSeat();
 	void InitSeatRod();
-    void InitWalls();
-    void InitBar();
-    void InitBartender();
-	void InitArm(vec3 center, vec3 up, vec3 right);
 
 public:
 	Stool();
