@@ -83,6 +83,18 @@ void Object::InternalInitialize()
 	this->normal_array_handle = this->normal_coordinate_handle = GLuint(-1);
 }
 
+void Object::BuildNormalVisualizationGeometry()
+{
+	float normal_scalar = 1.0f;
+	for (int i = 0; i < int(this->vertices.size()); i++)
+	{
+		this->normal_vertices.push_back(VertexAttributesP(this->vertices[i].position));
+		this->normal_vertices.push_back(VertexAttributesP(this->vertices[i].position + this->vertices[i].normal * normal_scalar));
+		this->normal_indices.push_back(this->normal_vertices.size() - 2);
+		this->normal_indices.push_back(this->normal_vertices.size() - 1);
+	}
+}
+
 bool Object::GLReturnedError(char * s)
 {
 	bool return_error = false;

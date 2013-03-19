@@ -28,6 +28,7 @@ public:
 	virtual void TakeDown();
 	virtual bool Initialize();
 	virtual bool PostGLInitialize(GLuint * vertex_array_handle, GLuint * vertex_coordinate_handle, GLsizeiptr sz, const GLvoid * ptr);
+	virtual void BuildNormalVisualizationGeometry();
 	virtual void Draw(const glm::mat4 & projection, glm::mat4 modelview, Shader * shader, const glm::ivec2 & size, const float time = 0) = 0;
 	virtual ~Object();
 

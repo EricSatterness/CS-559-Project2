@@ -97,6 +97,26 @@ VertexAttributesPN::VertexAttributesPN(const VertexAttributesPN & other)
 
 
 
+VertexAttributesPC::VertexAttributesPC()
+{
+	this->position = vec3(0.0f);
+	this->color = vec3(0.0f);
+}
+
+VertexAttributesPC::VertexAttributesPC(const vec3 & p, const vec3 & c)
+{
+	this->position = p;
+	this->color = c;
+}
+
+VertexAttributesPC::VertexAttributesPC(const VertexAttributesPC & other)
+{
+	this->position = other.position;
+	this->color = other.color;
+}
+
+
+
 VertexAttributesP::VertexAttributesP()
 {
 	this->position = vec3(0.0f);

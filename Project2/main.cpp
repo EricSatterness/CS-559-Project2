@@ -8,6 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "stool.h"
+#include "axes.h"
+#include "grid.h"
 
 // Useful links
 //http://www.arcsynthesis.org/gltut/index.html
@@ -15,7 +17,7 @@
 using namespace std;
 using namespace glm;
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #pragma region Data Structs
 // Holds the filenames of a vertex shader and fragement shader
@@ -33,9 +35,11 @@ struct WindowData
 	float window_aspect;
 	mat4 projection_matrix, modelview_matrix;
 	bool wireframe, normals, points, debug_mode;
+	vector<string> instructions;
 	int shader_index;
 	//std::vector<ShaderFiles *> shaders;
 	std::vector<Shader *> shaders;
+	std::vector<Object *> objects;
 } window;
 
 // Keeps track of the 1st person camera data
@@ -65,17 +69,19 @@ float rotateSpeed = 1.0f;
 // Zoom speed modifies the camera fov in units of feet
 float zoomSpeed = 0.5f;
 
-// Stool objects to be drawn in the scene
+// Objects to be drawn in the scene
+Axes *axes;
+Grid *grid;
 Stool *stool1;
 Stool *stool2;
-//*stool2, *stool3;
+//Stool *stool3;
 #pragma endregion
 
 void CloseFunc()
 {
 	window.window_handle = -1;
 
-	if (stool1 != NULL)
+	/*if (stool1 != NULL)
 	{
 		stool1->TakeDown();
 		delete stool1;
@@ -84,6 +90,27 @@ void CloseFunc()
 	{
 		stool2->TakeDown();
 		delete stool2;
+	}*/
+
+	if (axes != NULL)
+	{
+		axes->TakeDown();
+		delete axes;
+	}
+	if (grid != NULL)
+	{
+		grid->TakeDown();
+		delete grid;
+	}
+
+	for (int i = 0; i < (int)window.objects.size(); i++)
+	{
+		if (window.objects[i] != NULL)
+		{
+			window.objects[i]->TakeDown();
+			delete window.objects[i];
+		}
+
 	}
 }
 
@@ -137,10 +164,20 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		window.wireframe = !window.wireframe;
 		break;
 	case 'n':
-		stool1->EnableNormals(window.normals = !window.normals);
+		//stool1->EnableNormals(window.normals = !window.normals);
+		window.normals = !window.normals;
+		for (int i = 0; i < (int)window.objects.size(); i++)
+		{
+			window.objects[i]->EnableNormals(window.normals);
+		}
 		break;
 	case 'p':
-		stool1->EnablePoints(window.points = !window.points);
+		//stool1->EnablePoints(window.points = !window.points);
+		window.points = !window.points;
+		for (int i = 0; i < (int)window.objects.size(); i++)
+		{
+			window.objects[i]->EnablePoints(window.points);
+		}
 		break;
 
 	case 'x':
@@ -189,6 +226,33 @@ void SpecialFunc(int key, int x, int y)
 	}
 }
 
+void DisplayInstructions()
+{
+	if (window.window_handle == -1)
+		return;
+
+	vector<string> * s = &window.instructions;
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_DEPTH_TEST);
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, window.size.x, 0, window.size.y, 1, 10);
+	glViewport(0, 0, window.size.x, window.size.y);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glTranslated(10, 15 * s->size(), -5.5);
+	glScaled(0.1, 0.1, 1.0);
+	for (auto i = s->begin(); i < s->end(); ++i)
+	{
+		glPushMatrix();
+		glutStrokeString(GLUT_STROKE_MONO_ROMAN, (const unsigned char *) (*i).c_str());
+		glPopMatrix();
+		glTranslated(0, -150, 0);
+	}
+}
+
 void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 {
 	mat4 m;
@@ -196,17 +260,19 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 	if (window.debug_mode)
 	{
 		// Draw the main axes
-		glLoadMatrixf(value_ptr(modelview_matrix));
+		/*glLoadMatrixf(value_ptr(modelview_matrix));
 		glLineWidth(2.0);
 		glBegin(GL_LINES);
 			glColor3f(1,0,0);	glVertex3fv(ORG);	glVertex3fv(XP);
 			glColor3f(0,1,0);	glVertex3fv(ORG);	glVertex3fv(YP);
 			glColor3f(0,0,1);	glVertex3fv(ORG);	glVertex3fv(ZP);
-		glEnd();
+		glEnd();*/
+		m = scale(modelview_matrix, vec3(5.0f, 5.0f, 5.0f));
+		axes->Draw(projection_matrix, m, window.shaders[3], window.size, 0.0f);
 
 		// Draw the grid
 		// It was easier to draw the grid in all positive increments starting from (0,0,0) and then just shift it in order to center it on the modelview_matrix
-		m = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
+		/*m = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
 		glLoadMatrixf(value_ptr(m));
 		glLineWidth(1.0);
 		glColor3f(1,1,1);
@@ -220,9 +286,13 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 				glVertex3f(0,0,j);
 				glVertex3f(GRIDWIDTH,0,j);
 			}
-		glEnd();
+		glEnd();*/
+		m = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
+		m = scale(m, vec3(0.5f, 0.5f, 0.5f));
+		glLineWidth(1.0);
+		grid->Draw(projection_matrix, m, window.shaders[3], window.size, 0.0f);
 
-		// Make scale a little bigger while debugging
+		// May want to adjust the scale when debugging
 		m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
 	}
 	else
@@ -239,8 +309,8 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 	m = translate(m, vec3(24.0f, 0.0f, -12.0f));
 	stool2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
 
-	glutSwapBuffers();
-	glutPostRedisplay();
+	/*glutSwapBuffers();
+	glutPostRedisplay();*/
 }
 
 void DisplayFunc()
@@ -270,12 +340,17 @@ void DisplayFunc()
 	window.modelview_matrix = lookAt(vec3(eye), vec3(target), vec3(0.0f, 1.0f, 0.0f));
 
 	DrawScene(window.projection_matrix, window.modelview_matrix);
+	DisplayInstructions();
+
+	glutSwapBuffers();
+	glutPostRedisplay();
 }
 
 int main(int argc, char * argv[])
 {
 	glutInit(&argc, argv);
 	glutInitWindowSize(1024, 1024);
+	glutInitWindowPosition(20, 20);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 
 	window.window_handle = glutCreateWindow("1st Person View");
@@ -290,6 +365,18 @@ int main(int argc, char * argv[])
 	window.normals = false;
 	window.points = false;
 	window.debug_mode = false;
+
+	window.instructions.push_back("Project 2 - UW-Madison - CS 559");
+	window.instructions.push_back("Eric Satterness and Garett Handel");
+	window.instructions.push_back("");
+	window.instructions.push_back("UP/DOWN/LEFT/RIGHT    Rotate the camera");
+	window.instructions.push_back("I/J/K/L               Move the camera");
+	window.instructions.push_back("+/-                   Zoom camera in/out");
+	window.instructions.push_back("N                     Toggle normals");
+	window.instructions.push_back("P                     Toggle points");
+	window.instructions.push_back("W                     Toggle wireframe");
+	window.instructions.push_back("F1                    Switch debug/relase mode");
+	window.instructions.push_back("X                     Exit");
 
 	// Initialize 1st person camera
 	mainCamera.rotX = 0.0;
@@ -330,7 +417,7 @@ int main(int argc, char * argv[])
 	window.shaders.push_back(&phong_shader);
 	window.shaders.push_back(&gouraud_shader);*/
 
-	stool1 =  new Stool();
+	/*stool1 =  new Stool();
 	if (!stool1->Initialize())
 	{
 		stool1->TakeDown();
@@ -342,12 +429,43 @@ int main(int argc, char * argv[])
 	{
 		stool2->TakeDown();
 		return 0;
-	}
+	}*/
 
 	//if (!stool1->SetShader(window.shaders[0]->vert, window.shaders[0]->frag))
 	//	return 0;
 	//if (!stool2->SetShader(window.shaders[0]->vert, window.shaders[0]->frag))
 	//	return 0;
+
+	axes = new Axes();
+	if (!axes->Initialize())
+	{
+		axes->TakeDown();
+		delete axes;
+		return 0;
+	}
+	grid = new Grid();
+	if (!grid->Initialize())
+	{
+		grid->TakeDown();
+		delete grid;
+		return 0;
+	}
+
+	stool1 = new Stool();
+	stool2 = new Stool();
+
+	window.objects.push_back(stool1);
+	window.objects.push_back(stool2);
+
+	for (int i = 0; i < (int)window.objects.size(); i++)
+	{
+		if (!window.objects[i]->Initialize())
+		{
+			window.objects[i]->TakeDown();
+			delete window.objects[i];
+			return 0;
+		}
+	}
 
 	glutMainLoop();
 }

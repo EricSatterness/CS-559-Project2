@@ -48,6 +48,16 @@ public:
         glm::vec3 normal;
 };
 
+class VertexAttributesPC
+{
+public:
+        VertexAttributesPC();
+        VertexAttributesPC(const glm::vec3 & p, const glm::vec3 & c);
+        VertexAttributesPC(const VertexAttributesPC & other);
+        glm::vec3 position;
+        glm::vec3 color;
+};
+
 class VertexAttributesP
 {
 public:
