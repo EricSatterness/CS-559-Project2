@@ -1,4 +1,4 @@
-﻿Build started 3/18/2013 5:08:27 PM.
+﻿Build started 3/18/2013 8:14:46 PM.
      1>Project "\\wfs1\users$\handel\My Documents\CS-559-Project2\CS-559-Project2\Project2\Project2.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Project2.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -34,4 +34,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:14.37
+Time Elapsed 00:00:06.62

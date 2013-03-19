@@ -46,9 +46,11 @@ struct WindowData
 // Keeps track of the 1st person camera data
 struct CameraData
 {
-	float rotX, rotY;
-	float tranX, tranZ;
-	float zoom;
+	float rotX, rotY, rotZ;
+	float tranX, tranZ, tranY;
+	float lens, zoom;
+	float spinXZ, spinY;
+	float rad;
 } mainCamera;
 #pragma endregion
 
@@ -153,9 +155,11 @@ void KeyboardFunc(unsigned char c, int x, int y)
 	// IJKL strafe the camera
 	case 'i':
 		mainCamera.tranZ -= 1 * moveSpeed;
+		mainCamera.rotZ -= 1 * moveSpeed;
 		break;
 	case 'k':
 		mainCamera.tranZ += 1 * moveSpeed;
+		mainCamera.rotZ += 1 * moveSpeed;
 		break;
 	case 'j':
 		mainCamera.tranX -= 1 * moveSpeed;
@@ -168,10 +172,10 @@ void KeyboardFunc(unsigned char c, int x, int y)
 
 	// Zoom camera in and out
 	case '=':
-		mainCamera.zoom -= 1 * zoomSpeed;
+		mainCamera.lens -= 1 * zoomSpeed;
 		break;
 	case '-':
-		mainCamera.zoom += 1 * zoomSpeed;
+		mainCamera.lens += 1 * zoomSpeed;
 		break;
 
 	// Step through shaders
@@ -186,10 +190,26 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		window.wireframe = !window.wireframe;
 		break;
 	case 'n':
-		stool1->EnableNormals(window.normals = !window.normals);
+		stool1->EnableNormals(window.normals = !window.normals); //this is kind of working
+		stool2->EnableNormals(window.normals = !window.normals);
+		stool3->EnableNormals(window.normals = !window.normals);
+		can1->EnableNormals(window.normals = !window.normals);
+		can2->EnableNormals(window.normals = !window.normals);
+		can3->EnableNormals(window.normals = !window.normals);
+		bar->EnableNormals(window.normals = !window.normals);
+		walls->EnableNormals(window.normals = !window.normals);
+		person->EnableNormals(window.normals = !window.normals);
 		break;
 	case 'p':
 		stool1->EnablePoints(window.points = !window.points);
+		stool2->EnablePoints(window.points = !window.points);
+		stool3->EnablePoints(window.points = !window.points);
+		can1->EnablePoints(window.points = !window.points);
+		can2->EnablePoints(window.points = !window.points);
+		can3->EnablePoints(window.points = !window.points);
+		bar->EnablePoints(window.points = !window.points);
+		walls->EnablePoints(window.points = !window.points);
+		person->EnablePoints(window.points = !window.points);
 		break;
 
 	case 'x':
@@ -206,7 +226,7 @@ void KeyboardFunc(unsigned char c, int x, int y)
 
 	// Ensure camera can't zoom indefinitely
 	if (mainCamera.zoom > 60) mainCamera.zoom = 60;
-	if (mainCamera.zoom < 10) mainCamera.zoom = 10;
+	if (mainCamera.zoom < 5) mainCamera.zoom = 5;
 }
 
 void SpecialFunc(int key, int x, int y)
@@ -215,18 +235,18 @@ void SpecialFunc(int key, int x, int y)
 	{
 	// Rotate the 1st person camera using arrow keys
 	case GLUT_KEY_LEFT:
-		mainCamera.rotX -= 1 * rotateSpeed;
+		mainCamera.spinXZ -= 1.0f;
 		break;
 	case GLUT_KEY_RIGHT:
-		mainCamera.rotX += 1 * rotateSpeed;
+		mainCamera.spinXZ += 1.0f;
 		break;
 	case GLUT_KEY_UP:
-		mainCamera.rotY -= 1 * rotateSpeed;
-		if (mainCamera.rotY <= -90)
-			mainCamera.rotY = -89;
+		mainCamera.spinY -= 1.0f;
+		if (mainCamera.spinY <= -90)
+			mainCamera.spinY = -89;
 		break;
 	case GLUT_KEY_DOWN:
-		mainCamera.rotY += 1 * rotateSpeed;
+		mainCamera.spinY += 1.0f;
 		if (mainCamera.rotY >= 90)
 			mainCamera.rotY = 89;
 		break;
@@ -235,7 +255,31 @@ void SpecialFunc(int key, int x, int y)
 	case GLUT_KEY_F1:
 		window.debug_mode = !window.debug_mode;
 		break;
+
+	case GLUT_KEY_PAGE_UP:
+		mainCamera.tranY += 1 * moveSpeed;
+		mainCamera.rotY += 1 * moveSpeed;
+		break;
+
+	case GLUT_KEY_PAGE_DOWN:
+		mainCamera.tranY -= 1 * moveSpeed;
+		mainCamera.rotY -= 1 * moveSpeed;
+		break;
+
+	case GLUT_KEY_HOME:
+		mainCamera.zoom -= 1.0f;
+		break;
+
+	case GLUT_KEY_END:
+		mainCamera.zoom += 1.0f;
+		break;
 	}
+
+	mainCamera.rad = 0.01745f;
+	mainCamera.rotY = mainCamera.zoom * cos(mainCamera.rad * mainCamera.spinY);
+	mainCamera.rotX = mainCamera.zoom * sin(mainCamera.rad * mainCamera.spinXZ) * sin(mainCamera.rad * mainCamera.spinY);
+	mainCamera.rotZ = mainCamera.zoom * cos(mainCamera.rad * mainCamera.spinXZ) * sin(mainCamera.rad * mainCamera.spinY);
+	
 }
 
 void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
@@ -310,6 +354,12 @@ void DisplayFunc()
 {
 	if (window.window_handle == -1)
 		return;
+	
+	if (mainCamera.spinY < 1.0f) mainCamera.spinY = 1.0f;
+	if (mainCamera.spinY > 179.0f) mainCamera.spinY = 179.0f;
+	
+	if (mainCamera.lens < 30) mainCamera.lens = 30.0f;
+	if (mainCamera.lens > 120) mainCamera.lens = 120.0f;
 
 	assert(stool1 != NULL);
 	glEnable(GL_CULL_FACE);
@@ -321,15 +371,15 @@ void DisplayFunc()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, window.size.x, window.size.y);
 	glMatrixMode(GL_PROJECTION);
-	window.projection_matrix = perspective(mainCamera.zoom,  window.window_aspect, 1.0f, 1000.0f);
+	window.projection_matrix = perspective(mainCamera.lens,  window.window_aspect, 1.0f, 1000.0f);
 	glLoadMatrixf(value_ptr(window.projection_matrix));
 	glMatrixMode(GL_MODELVIEW);
-	// This allows the user to rotate the camera around the target
+	// This allows the user to rotate the camera around the target \ made this a bit easier to move around with
 	window.modelview_matrix = rotate(mat4(1.0f), 0.0f, vec3(0.0f, 1.0f, 0.0f));
 	window.modelview_matrix = rotate(window.modelview_matrix, 0.0f, vec3(1.0f, 0.0f, 0.0f));
-	// This allows the user to strafe the camera
-	vec4 eye = window.modelview_matrix * vec4(mainCamera.rotX, mainCamera.rotY, mainCamera.tranZ + 8.0f, 1.0f);
-	vec4 target = window.modelview_matrix * vec4(mainCamera.tranX, 0.0f, mainCamera.tranZ, 1.0f);
+	// This allows the user to strafe the camera \ same as above
+	vec4 eye = window.modelview_matrix * vec4(mainCamera.rotX, mainCamera.rotY, mainCamera.rotZ, 1.0f);
+	vec4 target = window.modelview_matrix * vec4(mainCamera.tranX, mainCamera.tranY, mainCamera.tranZ, 1.0f);
 	window.modelview_matrix = lookAt(vec3(eye), vec3(target), vec3(0.0f, 1.0f, 0.0f));
 
 	DrawScene(window.projection_matrix, window.modelview_matrix);
