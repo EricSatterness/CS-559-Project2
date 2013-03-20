@@ -75,8 +75,10 @@ void Bar::InitBar()
     int slices = 20;
     int stacks = 5;
 	float w_2 = BAR_WIDTH / 2.0f;
-	float bar_offset = 30.0f;
+	//float bar_offset = 30.0f;
+	float bar_offset = 0.0f;
 	float depth = BAR_DEPTH + bar_offset;
+	//float depth = BAR_DEPTH;
 	float can_depth_offset = depth + (BAR_DEPTH / 2.0f);
 	float can_side_offset = BAR_WIDTH / 4.0f;
     vec3 can_color(0.0317f, 0.0620f, 0.5678f);

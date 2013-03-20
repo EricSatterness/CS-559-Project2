@@ -237,7 +237,7 @@ void Stool::InitLeg(vec3 center, vec3 up, vec3 right)
 
 void Stool::InitDiskSupport(vec3 center, vec3 up, vec3 right, float radiusTop, float radiusBot, float height)
 {
-	int slices = 20;
+	int slices = 30;
 	int stacks = 2;
 	vec3 color(0.0f, 0.5f, 0.0f);
 
@@ -254,7 +254,7 @@ void Stool::InitDiskSupport(vec3 center, vec3 up, vec3 right, float radiusTop, f
 
 void Stool::InitRingSupport()
 {
-	int slices = 20;
+	int slices = 30;
 	int stacks = 8;
 	vec3 color(0.5f, 0.0f, 0.0f);
 
@@ -263,7 +263,7 @@ void Stool::InitRingSupport()
 
 void Stool::InitSeat()
 {
-	int slices = 20;
+	int slices = 30;
 	int stacks = 1;
 	vec3 color(0.0f, 0.0f, 0.5f);
 

@@ -17,6 +17,7 @@ Created:        2/25/13
 #include "object.h"
 
 using namespace std;
+using namespace glm;
 
 /*
 Notice the destructor in this case asserts that all resources

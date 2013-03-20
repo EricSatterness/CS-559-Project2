@@ -77,7 +77,8 @@ void Person::InitPerson()
     float angle = 15.0f*PI/180.0f;
 	float w_2 = LEG_WIDTH / 2.0f;
 	float h_2 = SPINE_HEIGHT / 2.0f;
-	float bar_offset = 30.0f;
+	//float bar_offset = 30.0f;
+	float bar_offset = 0.0f;
 	float bartender_offset = bar_offset + BAR_DEPTH * 2.5f;
 	float bartender_height = LEG_HEIGHT * 0.75f;
 	float tender_top = SPINE_HEIGHT + bartender_height + HEAD_RADIUS;

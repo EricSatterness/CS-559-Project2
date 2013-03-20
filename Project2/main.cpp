@@ -39,12 +39,14 @@ struct WindowData
 	ivec2 size;
 	float window_aspect;
 	mat4 projection_matrix, modelview_matrix;
-	bool wireframe, normals, points, debug_mode;
+	bool wireframe, normals, points, debug_mode, axes, grid;
 	vector<string> instructions;
 	int shader_index;
 	//std::vector<ShaderFiles *> shaders;
 	std::vector<Shader *> shaders;
 	std::vector<Object *> objects;
+	int debug_index;
+	std::vector<Object *> debug_objects;
 } window;
 
 // Keeps track of the 1st person camera data
@@ -56,8 +58,10 @@ struct CameraData
 	float spinXZ, spinY;
 	float rad;*/
 	float rotX, rotY;
-	float tranX, tranZ;
+	float tranX, tranY, tranZ;
 	float zoom;
+	bool freemode;
+	vec3 position, direction, up, right;
 } mainCamera;
 #pragma endregion
 
@@ -73,7 +77,7 @@ struct CameraData
 
 #pragma region Variables
 // Move speed is in feet
-float moveSpeed = 0.25f;
+float moveSpeed = 0.05f;
 // Rotate speed is in degrees
 float rotateSpeed = 1.0f;
 // Zoom speed modifies the camera fov in units of feet
@@ -92,6 +96,19 @@ Can *can2;
 Can *can3;
 Walls *walls;
 #pragma endregion
+
+void ResetCamera()
+{
+	mainCamera.rotX = 0.0;
+	mainCamera.rotY = 0.0;
+	mainCamera.tranX = 0.0;
+	mainCamera.tranZ = 0.0;
+	mainCamera.zoom = 40.0;
+	mainCamera.position = vec3(0.0f, 0.0f, 15.0f);
+	mainCamera.direction = vec3(0.0f, 0.0f, -1.0f);
+	mainCamera.up = vec3(0.0f, 1.0f, 0.0f);
+	mainCamera.right = vec3(0.0f, 0.0f, 0.0f);
+}
 
 void CloseFunc()
 {
@@ -167,18 +184,32 @@ void KeyboardFunc(unsigned char c, int x, int y)
 	//	break;
 
 
-	// IJKL strafe the camera
+	// IKJL strafe the camera forward, backward, left, or right
 	case 'i':
 		mainCamera.tranZ -= 1 * moveSpeed;
+		mainCamera.position += mainCamera.direction;
 		break;
 	case 'k':
 		mainCamera.tranZ += 1 * moveSpeed;
+		mainCamera.position -= mainCamera.direction;
 		break;
 	case 'j':
 		mainCamera.tranX -= 1 * moveSpeed;
+		mainCamera.position -= cross(mainCamera.direction, mainCamera.up);
 		break;
 	case 'l':
 		mainCamera.tranX += 1 * moveSpeed;
+		mainCamera.position += cross(mainCamera.direction, mainCamera.up);
+		break;
+
+	// Move the camera up or down
+	case 'u':
+		mainCamera.tranY += 1 * moveSpeed;
+		mainCamera.position += mainCamera.up;
+		break;
+	case 'o':
+		mainCamera.tranY -= 1 * moveSpeed;
+		mainCamera.position -= mainCamera.up;
 		break;
 
 	// Zoom camera in and out
@@ -189,6 +220,12 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		mainCamera.zoom += 1 * zoomSpeed;
 		break;
 
+	// Toggle camera between free and rotate mode
+	case 'c':
+		mainCamera.freemode = !mainCamera.freemode;
+		ResetCamera();
+		break;
+
 	// Step through shaders
 	case 's':
 		window.shader_index = ++window.shader_index % window.shaders.size();
@@ -196,7 +233,7 @@ void KeyboardFunc(unsigned char c, int x, int y)
 		//stool1->StepShader();
 		break;
 
-	// Turn on/off wireframe, normals, and points
+	// Turn on/off wireframe, normals, points, axes, and grid
 	case 'w':
 		window.wireframe = !window.wireframe;
 		break;
@@ -216,6 +253,12 @@ void KeyboardFunc(unsigned char c, int x, int y)
 			window.objects[i]->EnablePoints(window.points);
 		}
 		break;
+	case 'a':
+		window.axes = !window.axes;
+		break;
+	case 'g':
+		window.grid = !window.grid;
+		break;
 
 	case 'x':
 	case 27:
@@ -226,12 +269,29 @@ void KeyboardFunc(unsigned char c, int x, int y)
 	// Ensure camera can't strafe indefinitely
 	if (mainCamera.tranZ > 15) mainCamera.tranZ = 15;
 	if (mainCamera.tranZ < -15) mainCamera.tranZ = -15;
+	if (mainCamera.tranY > 15) mainCamera.tranY = 15;
+	if (mainCamera.tranY < -15) mainCamera.tranY = -15;
 	if (mainCamera.tranX > 15) mainCamera.tranX = 15;
 	if (mainCamera.tranX < -15) mainCamera.tranX = -15;
+	/*clamp(mainCamera.tranX, -20.0f, 20.0f);
+	clamp(mainCamera.tranY, -20.0f, 20.0f);
+	clamp(mainCamera.tranZ, -20.0f, 20.0f);*/
 
 	// Ensure camera can't zoom indefinitely
 	if (mainCamera.zoom > 60) mainCamera.zoom = 60;
 	if (mainCamera.zoom < 10) mainCamera.zoom = 10;
+
+	// I can't seem to get clamp to work... not sure why this is but it doesn't do anything even on a plain int...
+	//clamp(mainCamera.zoom, 10.0f, 60.0f);
+	//float derp = 65.0f;
+	//int herp = 5;
+	//if (mainCamera.zoom > 60)
+	//	bool derp = true;
+	//if (mainCamera.zoom < 10)
+	//	bool derp = true;
+	//clamp(mainCamera.zoom, 10.0f, 60.0f);
+	//clamp(derp, 10.0f, 60.0f);
+	//clamp(herp, 10, 60);
 }
 
 void SpecialFunc(int key, int x, int y)
@@ -308,9 +368,23 @@ void SpecialFunc(int key, int x, int y)
 
 	// Enable/diable debug mode
 	case GLUT_KEY_F1:
-		window.debug_mode = !window.debug_mode;
+		//window.debug_mode = !window.debug_mode;
+		window.debug_index = ++window.debug_index % (window.debug_objects.size() + 1);
 		break;
 	}
+
+	// This allows the camera to rotate about itself... but I need it to rotate around the center
+	mainCamera.direction.x = -cos(mainCamera.rotY*(-3.14f/180.0f)) * sin(mainCamera.rotX*(-3.14f/180.0f));
+	mainCamera.direction.y = sin(mainCamera.rotY*(-3.14f/180.0f));
+	mainCamera.direction.z = -cos(mainCamera.rotY*(-3.14f/180.0f)) * cos(mainCamera.rotX*(-3.14f/180.0f));
+
+	// Right vector
+	//mainCamera.right.x = sin(mainCamera.rotX - 3.14f/2.0f);
+	//mainCamera.right.y = 0;
+	//mainCamera.right.z = cos(mainCamera.rotX - 3.14f/2.0f);
+
+	// Up vector
+	//mainCamera.up = cross(mainCamera.right, mainCamera.direction);
 }
 
 void DisplayInstructions()
@@ -342,77 +416,107 @@ void DisplayInstructions()
 
 void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 {
-	mat4 m;
+	mat4 mv_scaled;
 
-	if (window.debug_mode)
+
+	// Originally, I defined debug mode to draw the axes and grid. Near the end, I switched these over to objects so that they wouldn't be using legacy gl. Then, later, I switched them to have separate key bindings
+	// 'a' and 'g' so that we could toggle them individually and use the debug mode to draw our objects individually.
+	//if (window.debug_mode)
+	//{
+	//	// Converted the axes and grid into objects so that we can use modern gl instead of legacy gl
+	//	// Draw the main axes
+	//	/*glLoadMatrixf(value_ptr(modelview_matrix));
+	//	glLineWidth(2.0);
+	//	glBegin(GL_LINES);
+	//		glColor3f(1,0,0);	glVertex3fv(ORG);	glVertex3fv(XP);
+	//		glColor3f(0,1,0);	glVertex3fv(ORG);	glVertex3fv(YP);
+	//		glColor3f(0,0,1);	glVertex3fv(ORG);	glVertex3fv(ZP);
+	//	glEnd();*/
+	//	m = scale(modelview_matrix, vec3(5.0f, 5.0f, 5.0f));
+	//	axes->Draw(projection_matrix, m, window.shaders[3], window.size, 0.0f);
+
+	//	// Draw the grid
+	//	// It was easier to draw the grid in all positive increments starting from (0,0,0) and then just shift it in order to center it on the modelview_matrix
+	//	/*m = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
+	//	glLoadMatrixf(value_ptr(m));
+	//	glLineWidth(1.0);
+	//	glColor3f(1,1,1);
+	//	glBegin(GL_LINES);
+	//	float j;
+	//		for (int i=0; i <= GRIDWIDTH*2; i++)
+	//		{
+	//			j = i/2.0f;
+	//			glVertex3f(j,0,0);
+	//			glVertex3f(j,0,GRIDWIDTH);
+	//			glVertex3f(0,0,j);
+	//			glVertex3f(GRIDWIDTH,0,j);
+	//		}
+	//	glEnd();*/
+	//	m = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
+	//	m = scale(m, vec3(0.5f, 0.5f, 0.5f));
+	//	glLineWidth(1.0);
+	//	grid->Draw(projection_matrix, m, window.shaders[3], window.size, 0.0f);
+
+	//	// May want to adjust the scale when debugging
+	//	m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
+	//}
+	//else
+	//{
+	//	// Scale from feet to inches
+	//	m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
+	//}
+
+	// Decide whether to draw the axes and/or grid
+	if (window.axes)
 	{
-		// Converted the axes and grid into objects so that we can use modern gl instead of legacy gl
-		// Draw the main axes
-		/*glLoadMatrixf(value_ptr(modelview_matrix));
-		glLineWidth(2.0);
-		glBegin(GL_LINES);
-			glColor3f(1,0,0);	glVertex3fv(ORG);	glVertex3fv(XP);
-			glColor3f(0,1,0);	glVertex3fv(ORG);	glVertex3fv(YP);
-			glColor3f(0,0,1);	glVertex3fv(ORG);	glVertex3fv(ZP);
-		glEnd();*/
-		m = scale(modelview_matrix, vec3(5.0f, 5.0f, 5.0f));
-		axes->Draw(projection_matrix, m, window.shaders[3], window.size, 0.0f);
-
-		// Draw the grid
-		// It was easier to draw the grid in all positive increments starting from (0,0,0) and then just shift it in order to center it on the modelview_matrix
-		/*m = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
-		glLoadMatrixf(value_ptr(m));
+		mv_scaled = scale(modelview_matrix, vec3(5.0f, 5.0f, 5.0f));
+		axes->Draw(projection_matrix, mv_scaled, window.shaders[3], window.size, 0.0f);
+	}
+	if (window.grid)
+	{
+		mv_scaled = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
+		mv_scaled = scale(mv_scaled, vec3(0.5f, 0.5f, 0.5f));
 		glLineWidth(1.0);
-		glColor3f(1,1,1);
-		glBegin(GL_LINES);
-		float j;
-			for (int i=0; i <= GRIDWIDTH*2; i++)
-			{
-				j = i/2.0f;
-				glVertex3f(j,0,0);
-				glVertex3f(j,0,GRIDWIDTH);
-				glVertex3f(0,0,j);
-				glVertex3f(GRIDWIDTH,0,j);
-			}
-		glEnd();*/
-		m = translate(modelview_matrix, vec3(-5.0f, 0.0f, -5.0f));
-		m = scale(m, vec3(0.5f, 0.5f, 0.5f));
-		glLineWidth(1.0);
-		grid->Draw(projection_matrix, m, window.shaders[3], window.size, 0.0f);
+		grid->Draw(projection_matrix, mv_scaled, window.shaders[3], window.size, 0.0f);
+	}
 
-		// May want to adjust the scale when debugging
-		m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
+	// If the debug index is one larger than the list of debug objects, draw the full scene
+	if (window.debug_index == window.debug_objects.size())
+	{
+		mv_scaled = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
+		mat4 m;
+
+		// Draw the stools in arbitrary positions
+		//stool1->Draw(window.projection_matrix, window.modelview_matrix, window.size, 0.0f);
+		//stool1->Draw(window.projection_matrix, m, window.size, 0.0f);
+
+		walls->Draw(window.projection_matrix, mv_scaled, window.shaders[0], window.size, 0.0f);
+
+		m = translate(mv_scaled, vec3(0.0f, 0.0f, -15.0f));
+		person->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+		bar->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+		m = translate(m, vec3());
+		can1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+		m = translate(m, vec3(5.0f, 0.0f, 0.0f));
+		can2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+		m = translate(m, vec3(-10.0f, 0.0f, 0.0f));
+		can3->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+
+		m = translate(mv_scaled, vec3(0.0f, 0.0f, -10.0f));
+		stool1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+		m = translate(m, vec3(24.0f, 0.0f, 0.0f));
+		stool2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+		m = translate(m, vec3(-48.0f, 0.0f, 0.0f));
+		stool3->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
+
+		/*glutSwapBuffers();
+		glutPostRedisplay();*/
 	}
 	else
 	{
-		// Scale from feet to inches
-		m = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
+		mv_scaled = scale(modelview_matrix, vec3(0.15f, 0.15f, 0.15f));
+		window.debug_objects[window.debug_index]->Draw(window.projection_matrix, mv_scaled, window.shaders[window.shader_index], window.size, 0.0f);
 	}
-
-	// Draw the stools in arbitrary positions
-	//stool1->Draw(window.projection_matrix, window.modelview_matrix, window.size, 0.0f);
-	//stool1->Draw(window.projection_matrix, m, window.size, 0.0f);
-	
-	walls->Draw(window.projection_matrix, m, window.shaders[0], window.size, 0.0f);
-	person->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	bar->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	can1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	m = translate(m, vec3(5.0f, 0.0f, 0.0f));
-	can2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	m = translate(m, vec3(-10.0f, 0.0f, 0.0f));
-	can3->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	m = translate(m, vec3(5.0f, 0.0f, 0.0f));
-	// When another stool is drawn, so is the environment surrounding it. Need to build it once, not for each stool.
-	// ^Fixed this by taking it out of the stool class...
-	m = translate(m, vec3(0.0f, 0.0f, -24.0f));
-	stool1->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	m = translate(m, vec3(24.0f, 0.0f, 0.0f));
-	stool2->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-	m = translate(m, vec3(-48.0f, 0.0f, 0.0f));
-	stool3->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
-
-	/*glutSwapBuffers();
-	glutPostRedisplay();*/
 }
 
 void DisplayFunc()
@@ -466,17 +570,27 @@ void DisplayFunc()
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, window.size.x, window.size.y);
-	glMatrixMode(GL_PROJECTION);
+	//glMatrixMode(GL_PROJECTION);
 	window.projection_matrix = perspective(mainCamera.zoom,  window.window_aspect, 1.0f, 40.0f);
-	glLoadMatrixf(value_ptr(window.projection_matrix));
-	glMatrixMode(GL_MODELVIEW);
-	// This allows the user to rotate the camera around the target
-	window.modelview_matrix = rotate(mat4(1.0f), mainCamera.rotX, vec3(0.0f, 1.0f, 0.0f));
-	window.modelview_matrix = rotate(window.modelview_matrix, mainCamera.rotY, vec3(1.0f, 0.0f, 0.0f));
-	// This allows the user to strafe the camera
-	vec4 eye = window.modelview_matrix * vec4(mainCamera.tranX, 0.0f, mainCamera.tranZ + 15.0f, 1.0f);
-	vec4 target = window.modelview_matrix * vec4(mainCamera.tranX, 0.0f, mainCamera.tranZ, 1.0f);
-	window.modelview_matrix = lookAt(vec3(eye), vec3(target), vec3(0.0f, 1.0f, 0.0f));
+	//glLoadMatrixf(value_ptr(window.projection_matrix));
+	//glMatrixMode(GL_MODELVIEW);
+
+	// If camera is in freemode, rotate the camera like in an FPS
+	if (mainCamera.freemode)
+	{
+		window.modelview_matrix = lookAt(mainCamera.position, mainCamera.position + mainCamera.direction, mainCamera.up);
+	}
+	// Otherwise, constrain the camera to rotate around a target point
+	else
+	{
+		// This allows the user to rotate the camera around the target
+		window.modelview_matrix = rotate(mat4(1.0f), mainCamera.rotX, vec3(0.0f, 1.0f, 0.0f));
+		window.modelview_matrix = rotate(window.modelview_matrix, mainCamera.rotY, vec3(1.0f, 0.0f, 0.0f));
+		// This allows the user to strafe the camera
+		vec4 eye = window.modelview_matrix * vec4(mainCamera.tranX, mainCamera.tranY, mainCamera.tranZ + 15.0f, 1.0f);
+		vec4 target = window.modelview_matrix * vec4(mainCamera.tranX, mainCamera.tranY, mainCamera.tranZ, 1.0f);
+		window.modelview_matrix = lookAt(vec3(eye), vec3(target), vec3(0.0f, 1.0f, 0.0f));
+	}
 
 	DrawScene(window.projection_matrix, window.modelview_matrix);
 	DisplayInstructions();
@@ -509,8 +623,11 @@ int main(int argc, char * argv[])
 	window.instructions.push_back("Eric Satterness and Garett Handel");
 	window.instructions.push_back("");
 	window.instructions.push_back("UP/DOWN/LEFT/RIGHT    Rotate the camera");
-	window.instructions.push_back("I/J/K/L               Move the camera");
+	window.instructions.push_back("I/K                   Move camera forward/backward");
+	window.instructions.push_back("J/L                   Move camera left/right");
+	window.instructions.push_back("U/O                   Move camera up/down");
 	window.instructions.push_back("+/-                   Zoom camera in/out");
+	window.instructions.push_back("C                     Toggle the camera mode");
 	window.instructions.push_back("N                     Toggle normals");
 	window.instructions.push_back("P                     Toggle points");
 	window.instructions.push_back("W                     Toggle wireframe");
@@ -518,11 +635,16 @@ int main(int argc, char * argv[])
 	window.instructions.push_back("X                     Exit");
 
 	// Initialize 1st person camera
-	mainCamera.rotX = 0.0;
+	/*mainCamera.rotX = 0.0;
 	mainCamera.rotY = 0.0;
 	mainCamera.tranX = 0.0;
 	mainCamera.tranZ = 0.0;
 	mainCamera.zoom = 40.0;
+	mainCamera.position = vec3(0.0f, 0.0f, 0.0f);
+	mainCamera.direction = vec3(0.0f, 0.0f, 1.0f);
+	mainCamera.up = vec3(0.0f, 1.0f, 0.0f);
+	mainCamera.right = vec3(0.0f, 0.0f, 0.0f);*/
+	ResetCamera();
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -613,6 +735,12 @@ int main(int argc, char * argv[])
 	window.objects.push_back(can1);
 	window.objects.push_back(can2);
 	window.objects.push_back(can3);
+
+	window.debug_objects.push_back(stool1);
+	window.debug_objects.push_back(person);
+	window.debug_objects.push_back(bar);
+	window.debug_objects.push_back(can1);
+	//window.debug_objects.push_back(walls);
 
 	for (int i = 0; i < (int)window.objects.size(); i++)
 	{
