@@ -1,7 +1,14 @@
 #include "shapes.h"
 
+// NOTE: These shape functions all define meshes without duplicating shared vertices and the normals are calculated with the intent of being used in a smooth shader.
+// So technically, the flat shader is incorrect because it uses the smooth normal instead of the face normal. However, because we are using so many faces on our round
+// shapes in this project, it isn't noticeable that the normal is incorrect.
+// Also, when making a closed cylinder by defining a cylinder and a top and bottom circle, we will get a sharp edge even when using a smooth shader. This is because the
+// shapes are initialized separately so we end up with duplicated vertices where the shapes overlap. This actually works out well because we want to have sharp edges
+// in those situtations anyway. Therefore, no special normal calculations are needed! Hurray!
+
 // Stores the vertex indeces that define the triangles in any shape
-// height and width refer to the number of vertices in the object as it wraps around.
+// rows and columns refer to the number of vertices in the object as it wraps around. Even though they are stored in a 1D array, we can think of the rows and columns of vertices as though they are a 2D array
 // startPos is the position of the first vertex for a shape in the vertex array
 void defineVertexIndices(vector<GLuint> & vertex_indices, int cols, int rows, int startPos)
 {
@@ -37,6 +44,7 @@ void defineVertexIndices(vector<GLuint> & vertex_indices, int cols, int rows, in
 	}
 }
 
+// Decided to make a more modular shape function: defineRhombus
 //void defineRectangle(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 topleft, int height, int width)
 //{
 //	vec3 p = topleft;
@@ -63,7 +71,8 @@ void defineVertexIndices(vector<GLuint> & vertex_indices, int cols, int rows, in
 //	vertex_indices.push_back(3);
 //	vertex_indices.push_back(2);
 //}
-//
+
+// Instead of using a define cube function, let the user construct it themselves using the defineRhombus function to create each face.
 //void defineCube(vector<VertexAttributes> & vertices, vector<GLuint> & vertex_indices, vec3 center, int height, int width)
 //{
 //	//defineRhombus(vertices, vertex_indices, center, height, width, 0.0f);
@@ -87,7 +96,8 @@ void defineRhombus(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & ver
 {
 	// Indicates where this shape starts in the vertex array
 	int startPos = vertices.size();
-
+	
+	// This was my first attempt. It creates a plain rectangle at the origin and doesn't support any other orientations or vertex spacing
 	/*for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
@@ -113,6 +123,7 @@ void defineRhombus(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & ver
 	vec3 c = color;
 	vec2 t(0.0f, 0.0f);
 
+	// This creates a rectangle at a specified orientation but doesn't allow the user to specify the vertex spacing
 	/*for (int i = 0; i <= height; i++)
 	{
 		for (int j = 0; j <= width; j++)
@@ -202,7 +213,8 @@ void defineCylinder(vector<VertexAttributesPCNT> & vertices, vector<GLuint> & ve
 	mat3 rMatNormal = createRotationMatrix(tangent_n, -slopeAngle);
 	
 	// Vertex attributes
-	// Start from top-center point inline with normal to right and up vector
+	// Start from the top at the point along the normal to the right and up vectors
+	// Creates a cyclinder about the up vector
 	vec3 n = glm::normalize(direction_n * rMatNormal);
 	vec3 p = center + direction_n * radiusCur;
 	vec3 c = color;

@@ -51,6 +51,12 @@
     <ClCompile Include="walls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="axes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="grid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stool.h">
@@ -86,6 +92,12 @@
     <ClInclude Include="walls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="axes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="grid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="basic_shader.frag" />
@@ -98,5 +110,9 @@
     <None Include="gouraud_shader.frag" />
     <None Include="phong_shader.frag" />
     <None Include="phong_shader.vert" />
+    <None Include="brick_shader.vert" />
+    <None Include="brick_shader.frag" />
+    <None Include="phong_attenuated_shader.frag" />
+    <None Include="README.txt" />
   </ItemGroup>
 </Project>

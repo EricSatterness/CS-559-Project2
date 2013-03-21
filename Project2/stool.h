@@ -21,6 +21,7 @@ private:
 	static const float ROD_RADIUS, ROD_HEIGHT;
 	static const float RING_RADIUS_INNER, RING_RADIUS_OUTER, RING_OFFSET;
 
+	// Fixed this bad design by passing in a shader pointer to the object's draw method
 	//int shader_index;
 
 	//BAD DESIGN WARNING...

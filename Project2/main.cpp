@@ -25,6 +25,7 @@ using namespace glm;
 //#define DEBUG 1
 
 #pragma region Data Structs
+// Took this out because it is easier to just pass a shader pointer to the draw method of the objects
 // Holds the filenames of a vertex shader and fragement shader
 //struct ShaderFiles
 //{
@@ -60,12 +61,14 @@ struct CameraData
 	float rotX, rotY;
 	float tranX, tranY, tranZ;
 	float zoom;
+	// Freemode changes the rotation to be about the camera's position rather than the camera's target
 	bool freemode;
 	vec3 position, direction, up, right;
 } mainCamera;
 #pragma endregion
 
 #pragma region Constants
+// These have been removed because the axes and grid are now objects
 // These represent the axes
 //const float	ORG[3] = {0,0,0},
 //			XP[3] = {5,0,0},
@@ -77,11 +80,14 @@ struct CameraData
 
 #pragma region Variables
 // Move speed is in feet
-float moveSpeed = 0.05f;
+float moveSpeed = 0.1f;
 // Rotate speed is in degrees
 float rotateSpeed = 1.0f;
 // Zoom speed modifies the camera fov in units of feet
 float zoomSpeed = 0.5f;
+
+// Shaders
+Shader phong_shader, gouraud_shader, flat_shader, colored_shader, basic_shader, brick_shader, phong_attenuated_shader;
 
 // Objects to be drawn in the scene
 Axes *axes;
@@ -97,6 +103,8 @@ Can *can3;
 Walls *walls;
 #pragma endregion
 
+// Reset the camera variables when switching between camera modes.
+// This is easier than trying to switch modes at the camera's current position because both modes use the rotation variables and they use them differently.
 void ResetCamera()
 {
 	mainCamera.rotX = 0.0;
@@ -110,6 +118,7 @@ void ResetCamera()
 	mainCamera.right = vec3(0.0f, 0.0f, 0.0f);
 }
 
+// Take care of taking down and deleting any items
 void CloseFunc()
 {
 	window.window_handle = -1;
@@ -157,6 +166,7 @@ void KeyboardFunc(unsigned char c, int x, int y)
 
 	switch (c)
 	{
+	// Started modifying the code for the camera rotation but never got a chance to finish. So decided to just comment it out and go back to what I had before
 	//// IJKL strafe the camera
 	//case 'i':
 	//	mainCamera.tranZ -= 1 * moveSpeed;
@@ -281,7 +291,7 @@ void KeyboardFunc(unsigned char c, int x, int y)
 	if (mainCamera.zoom > 60) mainCamera.zoom = 60;
 	if (mainCamera.zoom < 10) mainCamera.zoom = 10;
 
-	// I can't seem to get clamp to work... not sure why this is but it doesn't do anything even on a plain int...
+	// I can't seem to get clamp to work... not sure why this is but it doesn't do anything even on a simple int...
 	//clamp(mainCamera.zoom, 10.0f, 60.0f);
 	//float derp = 65.0f;
 	//int herp = 5;
@@ -296,6 +306,7 @@ void KeyboardFunc(unsigned char c, int x, int y)
 
 void SpecialFunc(int key, int x, int y)
 {
+	// Started modifying the code for the camera movement but never got a chance to finish. So decided to just comment it out and go back to what I had before
 	//switch(key)
 	//{
 	//// Rotate the 1st person camera using arrow keys
@@ -405,6 +416,7 @@ void DisplayInstructions()
 	glLoadIdentity();
 	glTranslated(10, 15 * s->size(), -5.5);
 	glScaled(0.1, 0.1, 1.0);
+	glLineWidth(1.0);
 	for (auto i = s->begin(); i < s->end(); ++i)
 	{
 		glPushMatrix();
@@ -414,6 +426,7 @@ void DisplayInstructions()
 	}
 }
 
+// The scene drawing code is kept separate in case we want to use multiple cameras like in project one
 void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 {
 	mat4 mv_scaled;
@@ -480,7 +493,7 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 		grid->Draw(projection_matrix, mv_scaled, window.shaders[3], window.size, 0.0f);
 	}
 
-	// If the debug index is one larger than the list of debug objects, draw the full scene
+	// If the debug index is one larger than the last item in debug objects, draw the full scene
 	if (window.debug_index == window.debug_objects.size())
 	{
 		mv_scaled = scale(modelview_matrix, vec3(0.083f, 0.083f, 0.083f));
@@ -490,7 +503,7 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 		//stool1->Draw(window.projection_matrix, window.modelview_matrix, window.size, 0.0f);
 		//stool1->Draw(window.projection_matrix, m, window.size, 0.0f);
 
-		walls->Draw(window.projection_matrix, mv_scaled, window.shaders[0], window.size, 0.0f);
+		walls->Draw(window.projection_matrix, mv_scaled, &brick_shader, window.size, 0.0f);
 
 		m = translate(mv_scaled, vec3(0.0f, 0.0f, -15.0f));
 		person->Draw(window.projection_matrix, m, window.shaders[window.shader_index], window.size, 0.0f);
@@ -512,6 +525,7 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 		/*glutSwapBuffers();
 		glutPostRedisplay();*/
 	}
+	// Otherwise, draw just the current object in the debug objects list
 	else
 	{
 		mv_scaled = scale(modelview_matrix, vec3(0.15f, 0.15f, 0.15f));
@@ -521,6 +535,7 @@ void DrawScene(mat4 & projection_matrix, mat4 & modelview_matrix)
 
 void DisplayFunc()
 {
+	// Started modifying the code for the camera movement but never got a chance to finish. So decided to just comment it out and go back to what I had before
 	//if (window.window_handle == -1)
 	//	return;
 	//
@@ -571,7 +586,7 @@ void DisplayFunc()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, window.size.x, window.size.y);
 	//glMatrixMode(GL_PROJECTION);
-	window.projection_matrix = perspective(mainCamera.zoom,  window.window_aspect, 1.0f, 40.0f);
+	window.projection_matrix = perspective(mainCamera.zoom,  window.window_aspect, 1.0f, 25.0f);
 	//glLoadMatrixf(value_ptr(window.projection_matrix));
 	//glMatrixMode(GL_MODELVIEW);
 
@@ -631,6 +646,8 @@ int main(int argc, char * argv[])
 	window.instructions.push_back("N                     Toggle normals");
 	window.instructions.push_back("P                     Toggle points");
 	window.instructions.push_back("W                     Toggle wireframe");
+	window.instructions.push_back("A                     Toggle axes");
+	window.instructions.push_back("G                     Toggle grid");
 	window.instructions.push_back("F1                    Switch debug/relase mode");
 	window.instructions.push_back("X                     Exit");
 
@@ -652,7 +669,6 @@ int main(int argc, char * argv[])
 		return 0;
 	}
 
-	Shader phong_shader, gouraud_shader, flat_shader, colored_shader, basic_shader;
 	if (!phong_shader.Initialize("phong_shader.vert", "phong_shader.frag"))
 		return 0;
 	if (!gouraud_shader.Initialize("gouraud_shader.vert", "gouraud_shader.frag"))
@@ -663,12 +679,19 @@ int main(int argc, char * argv[])
 		return 0;
 	if (!basic_shader.Initialize("basic_shader.vert", "basic_shader.frag"))
 		return 0;
+	if (!brick_shader.Initialize("brick_shader.vert", "brick_shader.frag"))
+		return 0;
+	if (!phong_attenuated_shader.Initialize("phong_shader.vert", "phong_attenuated_shader.frag"))
+		return 0;
 	window.shaders.push_back(&phong_shader);
 	window.shaders.push_back(&gouraud_shader);
 	window.shaders.push_back(&flat_shader);
 	window.shaders.push_back(&colored_shader);
 	window.shaders.push_back(&basic_shader);
+	window.shaders.push_back(&brick_shader);
+	window.shaders.push_back(&phong_attenuated_shader);
 
+	// Now that we are sending a shader pointer to the draw methods, we don't need to pass in the shader files themselves
 	/*phong_shader.vert = "phong_shader.vert";
 	phong_shader.frag = "phong_shader.frag";
 	gouraud_shader.vert = "basic_shader.vert";
@@ -695,7 +718,8 @@ int main(int argc, char * argv[])
 	if (!stool2->SetShader(window.shaders[0]->vert, window.shaders[0]->frag))
 		return 0;*/
 
-	// Any objects that don't need to have normals displayed should be kept out of the main objects list
+	// Any objects that we don't want to have normals displayed should be kept out of the main objects list.
+	// This also means that they will not be affected by the shader stepping.
 	axes = new Axes();
 	if (!axes->Initialize())
 	{

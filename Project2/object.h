@@ -6,7 +6,9 @@ A sample hello world like program demonstrating modern
 OpenGL techniques. 
 
 Created:        2/25/13
-Updates:
+
+Modified by:	Eric Satterness
+				3/20/13
 */
 
 #pragma once

@@ -72,7 +72,8 @@ void Walls::InitWalls()
     int vertexRows = 100;
 	int vertexCols = 100;
 	float w_2 = WALLS_WIDTH / 2.0f;
-    vec3 color(0.3141f, 0.4626f, 0.0628f);
+    //vec3 color(0.3141f, 0.4626f, 0.0628f);
+	vec3 color(0.81f, 0.81f, 0.81f);
 
     vec3 up_n = glm::normalize(UP);
 	vec3 right_n = glm::normalize(RIGHT);

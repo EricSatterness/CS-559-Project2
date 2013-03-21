@@ -10,6 +10,10 @@ be derived. It assumes that all drawable objects have some geometry
 to buffer.
 
 Created:        2/25/13
+
+
+Modified by:	Eric Satterness
+				3/20/13
 */
 
 #include <iostream>

@@ -70,10 +70,10 @@ void Axes::Draw(const mat4 & projection, mat4 modelview, Shader * shader, const 
 
 	glBindVertexArray(this->vertex_array_handle);
 
-	GLfloat prevLineWidth = GL_LINE_WIDTH;
+	//GLfloat prevLineWidth = GL_LINE_WIDTH;
 	glLineWidth(2.0);
 	glDrawElements(GL_LINES, this->vertex_indices.size(), GL_UNSIGNED_INT , &this->vertex_indices[0]);
-	glLineWidth(prevLineWidth);
+	//glLineWidth(prevLineWidth);
 
 	glUseProgram(0);
 	glBindVertexArray(0);
